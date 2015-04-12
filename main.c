@@ -2,12 +2,14 @@
 #include <conio.h>
 #include <time.h>
 #include <graphics.h>
+#include <time.h>
 
 #define N 10
 #define TAM 10
 #define PROF TAM/2
 #define PROFX 3*PROF/4
 
+typedef char String [100];
 typedef struct{
     int x,y;
     int color;
@@ -21,49 +23,37 @@ typedef struct{
 }TJugador;
 
 
+// Funciones del juego
+void crea_contenedor(int x, int y,  TCubo cont[N][N][N]);
+void cubo(int x, int y, int color);
+void juego(String nombre);
+void pinta_ambiente(String nombre);
+void pinta_contenedor(TCubo cont[N][N][N]);
 
+// Funciones de portada
 void portada();
 
-void crea_contenedor(int x, int y,  TCubo cont[N][N][N]);
-void pinta_contenedor(TCubo cont[N][N][N]);
-void juego(char nombre[100]);
-void pinta_ambiente(char nombre[100]);
+// Variables globales.
+int maxx, maxy; // Evita repetir la funcion getmaxN() cada vez que se llama en un ciclo.
 
-void cubo(int x, int y, int color);
 int main()
 {
 
+    initwindow(800,600,"Pacmario");
+    maxx = getmaxx();
+    maxy = getmaxy();
 
-    initwindow(640,480,"Proyecto EDA");
     srand(time(NULL));
-/*    portada();
-    getch();
+    portada();
     cleardevice();
-*/
 
-    juego("Silvia");
+    setbkcolor(BLACK);
+    juego("Jesús");
     getch();
     closegraph();
     return(0);
 }
 
-void pinta_contenedor(TCubo cont[N][N][N])
-{
-  int k,j,i;
-
-  setcolor(15);
-  rectangle(cont[0][N-1][0].x+PROFX,cont[0][N-1][0].y-PROF,cont[0][0][N-1].x+TAM+PROFX,cont[0][0][N-1].y+TAM-PROF);
-  line(cont[0][N-1][0].x+PROFX,cont[0][N-1][0].y-PROF,cont[N-1][N-1][0].x,cont[N-1][N-1][0].y);
-  line(cont[0][0][0].x+PROFX,cont[0][0][0].y+TAM-PROF,cont[N-1][0][0].x,cont[N-1][0][0].y+TAM);
-  for(k=0;k<N;k++)
-   for(j=0;j<N;j++)
-    for(i=0;i<N;i++)
-     if(cont[k][j][i].e==1)
-       cubo(cont[k][j][i].x,cont[k][j][i].y,cont[k][j][i].color);
-  rectangle(cont[N-1][N-1][0].x,cont[N-1][N-1][0].y,cont[N-1][0][N-1].x+TAM,cont[N-1][0][N-1].y+TAM);
-  line(cont[0][0][N-1].x+TAM+PROFX,cont[0][0][N-1].y+TAM-PROF,cont[N-1][0][N-1].x+TAM,cont[N-1][0][N-1].y+TAM);
-  line(cont[0][N-1][N-1].x+TAM+PROFX,cont[0][N-1][N-1].y-PROF,cont[N-1][N-1][N-1].x+TAM,cont[N-1][N-1][N-1].y);
-}
 void crea_contenedor(int x, int y,TCubo cont[N][N][N])
 {
   int k,j,i;
@@ -77,23 +67,6 @@ void crea_contenedor(int x, int y,TCubo cont[N][N][N])
         cont[k][j][i].color=rand()%16;
         cont[k][j][i].e=0;
     }
-
-}
-
-void portada()
-{
-    srand(time(NULL));
-/*     while(kbhit()==0)
-        putpixel(rand()%getmaxx(),rand()%getmaxy(),rand()%16);*/
-    setcolor(YELLOW);
-    line(getmaxx()/2,0,getmaxx()/2,getmaxy());
-    setcolor(RED);
-    line(0,getmaxy()/2,getmaxx(),getmaxy()/2);
-    setcolor(WHITE);
-    circle(getmaxx()/2,getmaxy()/2,100);
-    rectangle(getmaxx()/2-100,getmaxy()/2-100,getmaxx()/2+100,getmaxy()/2+100);
-    settextstyle(3,0,2);
-    outtextxy(100,100,"Hola Mundo");
 
 }
 
@@ -136,13 +109,13 @@ void juego(char nombre[100])
     TJugador maq={N-1,N-1,N-1,1};
     int tecla,dir;
 
-  srand(time(NULL));
-  crea_contenedor(getmaxx()/6,getmaxy()/4,contenedor);
+    srand(time(NULL));
+    crea_contenedor(maxx/6,maxy/4,contenedor);
 
-  pinta_ambiente(nombre);
+    pinta_ambiente(nombre);
 
-  do
-  {
+    do
+    {
 
     contenedor[jug.m][jug.r][jug.c].e=1;  //Enciende jugador
     contenedor[jug.m][jug.r][jug.c].color=jug.color;
@@ -150,7 +123,7 @@ void juego(char nombre[100])
     contenedor[maq.m][maq.r][maq.c].e=1;  //Enciende maquina
     contenedor[maq.m][maq.r][maq.c].color=maq.color;
     setfillstyle(1,0);
-    bar(1,1,getmaxx()/2-1,getmaxy()/2-1);
+    bar(1,1,maxx/2-1,maxy/2-1);
     pinta_contenedor(contenedor);
     delay(100);
     contenedor[jug.m][jug.r][jug.c].e=0;  //Apaga jugador
@@ -221,7 +194,7 @@ void juego(char nombre[100])
                  break;
       }
     }
-   }while(tecla!=27);
+    }while(tecla!=27);
 
 
 
@@ -230,23 +203,110 @@ void juego(char nombre[100])
 void pinta_ambiente(char nombre[100])
 {
     cleardevice();
- //   setlinestyle(1,0,3);
-    rectangle(0,0,getmaxx(),getmaxy());
-    line(getmaxx()/2,0,getmaxx()/2,getmaxy()/2);
-    line(0,getmaxy()/2,getmaxx()/2,getmaxy()/2);
-    outtextxy(getmaxx()/2+10,10,"Nombre: ");
-    outtextxy(getmaxx()/2+10+textwidth("Nombre:  "),10,nombre);
-    outtextxy(getmaxx()/2+10,60,"Puntos: ");
-    outtextxy(getmaxx()/2+10,110,"Tiempo: ");
+ // setlinestyle(1,0,3);
+
+    settextstyle(3, HORIZ_DIR, 1);
+
+    setcolor(WHITE);
+    rectangle(0,0,maxx,maxy);
+    line(maxx/2,0,maxx/2,maxy/2);
+    line(0,maxy/2,maxx/2,maxy/2);
+    outtextxy(maxx/2+10,10,"Nombre: ");
+    outtextxy(maxx/2+10+textwidth("Nombre:  "),10,nombre);
+    outtextxy(maxx/2+10,60,"Puntos: ");
+    outtextxy(maxx/2+10,110,"Tiempo: ");
 }
 
+void pinta_contenedor(TCubo cont[N][N][N])
+{
+    int i,j,k;
 
+    setcolor(WHITE);
+    rectangle(cont[0][N-1][0].x+PROFX,cont[0][N-1][0].y-PROF,cont[0][0][N-1].x+TAM+PROFX,cont[0][0][N-1].y+TAM-PROF);
+    line(cont[0][N-1][0].x+PROFX,cont[0][N-1][0].y-PROF,cont[N-1][N-1][0].x,cont[N-1][N-1][0].y);
+    line(cont[0][0][0].x+PROFX,cont[0][0][0].y+TAM-PROF,cont[N-1][0][0].x,cont[N-1][0][0].y+TAM);
+    for(i=0;i<N;i++)
+    for(j=0;j<N;j++)
+    for(k=0;k<N;k++)
+     if(cont[k][j][i].e==1)
+       cubo(cont[k][j][i].x,cont[k][j][i].y,cont[k][j][i].color);
+    rectangle(cont[N-1][N-1][0].x,cont[N-1][N-1][0].y,cont[N-1][0][N-1].x+TAM,cont[N-1][0][N-1].y+TAM);
+    line(cont[0][0][N-1].x+TAM+PROFX,cont[0][0][N-1].y+TAM-PROF,cont[N-1][0][N-1].x+TAM,cont[N-1][0][N-1].y+TAM);
+    line(cont[0][N-1][N-1].x+TAM+PROFX,cont[0][N-1][N-1].y-PROF,cont[N-1][N-1][N-1].x+TAM,cont[N-1][N-1][N-1].y);
+}
+void animarPac(int tam, int altura)
+{
+    int x, ang, aux = 1;
 
+    for(x=0, ang=0; x<maxx+tam*2; x+=2, ang += aux)
+    {
+        if(ang==60)
+            aux = -aux;
+        else if(ang == 0)
+            aux = abs(aux);
 
+        setfillstyle(1,0xFF9900);
+        setcolor(0xFF9900);
+        bar(0, maxy-altura-tam, x, maxy-altura+tam);
 
+        setfillstyle(1,0x00CCFF);
+        setcolor(0x00CCFF);
+        pieslice(x, maxy-altura, ang, 360-ang, tam);
 
+        delay(3);
+    }
+}
+void portada()
+{
+    int tam = 20, // Tamaño del Pac
+        altura = 140; // Altura del suelo
 
+    // cielo
+    setfillstyle(1,0xFF9900);
+    bar(0, 0, maxx+1, maxy+1);
 
+    // titulo
+    int margin = 6;
+    String titulo = " PAC-MARIO ";
+    settextstyle(10, HORIZ_DIR, 8);
+    setfillstyle(9,0x40E8FF);
+    setbkcolor(0x00B6EA);
+    bar(
+        maxx/2-textwidth(titulo)/2-margin,
+        maxy/8-margin,
+        maxx/2+textwidth(titulo)/2+margin,
+        maxy/8+textheight(titulo)+margin);
+    setcolor(0x40E8FF);
+    outtextxy(maxx/2-textwidth(titulo)/2, maxy/8, titulo);
 
+    // tierra
+    setfillstyle(1,0x336699);
+    bar(0, maxy-altura+tam, maxx+1, maxy+1);
 
+    // pasto
+    setfillstyle(1,0x00CC7A);
+    setcolor(0x00CC7A);
+    bar(0, maxy-altura+tam, maxx+1, maxy-altura+tam+10);
 
+    // mas tierra
+    int i, tmp = maxy-altura+tam+10;
+    for(i=0; i<40000; i++)
+        putpixel(rand()%maxx, rand()%maxy+tmp, 0x275078);
+
+    // enter
+    setfillstyle(1,0x00CC7A);
+    setcolor(BLACK);
+    settextstyle(8, HORIZ_DIR, 2);
+    setbkcolor(0xFF9900);
+    outtextxy(maxx/2-textwidth("Presiona Enter")/2, maxy/2, "Presiona Enter");
+
+    while(kbhit()==0)
+    {
+        time_t tiempo = time(NULL);
+        struct tm *tm;
+        tm = localtime (&tiempo);
+        if(tm->tm_sec == 15 || tm->tm_sec == 45)
+            animarPac(tam, altura);
+        delay(500);
+    }
+}
