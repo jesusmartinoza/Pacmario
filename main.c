@@ -4,8 +4,9 @@
 #include <graphics.h>
 #include <time.h>
 
-#define N 10
-#define TAM 10
+#define N 25
+#define R 2 // Renglones de altura
+#define TAM 20
 #define PROF TAM/2
 #define PROFX 3*PROF/4
 
@@ -24,13 +25,14 @@ typedef struct{
 
 
 // Funciones del juego
-void crea_contenedor(int x, int y,  TCubo cont[N][N][N]);
+void crea_contenedor(int x, int y,  TCubo cont[N][R][N]);
 void cubo(int x, int y, int color);
 void juego(String nombre);
 void pinta_ambiente(String nombre);
-void pinta_contenedor(TCubo cont[N][N][N]);
+void pinta_contenedor(TCubo cont[N][R][N]);
 
 // Funciones de portada
+void animarPac(int tam, int altura);
 void portada();
 
 // Variables globales.
@@ -54,18 +56,18 @@ int main()
     return(0);
 }
 
-void crea_contenedor(int x, int y,TCubo cont[N][N][N])
+void crea_contenedor(int x, int y,TCubo cont[N][R][N])
 {
-  int k,j,i;
+  int i,j,k;
 
-  for(k=0;k<N;k++)
-   for(j=0;j<N;j++)
-    for(i=0;i<N;i++)
+  for(i=0;i<N;i++)
+   for(j=0;j<R;j++)
+    for(k=0;k<N;k++)
     {
-        cont[k][j][i].x=x+i*TAM-k*PROFX;
-        cont[k][j][i].y=y-j*TAM+k*PROF;
-        cont[k][j][i].color=rand()%16;
-        cont[k][j][i].e=0;
+        cont[i][j][k].x = x+k*TAM-i*PROFX;
+        cont[i][j][k].y = y-j*TAM+i*PROF;
+        cont[i][j][k].color = 5;
+        cont[i][j][k].e = 0;
     }
 
 }
@@ -76,12 +78,13 @@ void cubo(int x, int y, int color)
 
     setcolor(15);
     setfillstyle(1,color);
+
     //Cara frontal
     bar(x,y,x+TAM,y+TAM);
     rectangle(x,y,x+TAM,y+TAM);
     //Cara lateral
-    puntos[0]=x+TAM;
-    puntos[1]=y;
+    puntos[0]= x+TAM;
+    puntos[1]= y;
     puntos[2]= x+TAM;
     puntos[3]= y+TAM;
     puntos[4]= x+TAM+PROFX;
@@ -90,8 +93,8 @@ void cubo(int x, int y, int color)
     puntos[7]= y-PROF;
     fillpoly(4,puntos);
     //Cara Superior
-    puntos[0]=x;
-    puntos[1]=y;
+    puntos[0]= x;
+    puntos[1]= y;
     puntos[2]= x+TAM;
     puntos[3]= y;
     puntos[4]= x+TAM+PROFX;
@@ -103,100 +106,60 @@ void cubo(int x, int y, int color)
 
 void juego(char nombre[100])
 {
-
-    TCubo contenedor[N][N][N];
-    TJugador jug={0,0,0,13};
-    TJugador maq={N-1,N-1,N-1,1};
     int tecla,dir;
 
+    TCubo contenedor[N][R][N];
+    TJugador jug={0,0,0,0x00ffff};
     srand(time(NULL));
-    crea_contenedor(maxx/6,maxy/4,contenedor);
+    crea_contenedor(maxx/2-maxy/4,maxy/3,contenedor);
+    pinta_contenedor(contenedor);
 
-    pinta_ambiente(nombre);
+    //pinta_ambiente(nombre);
 
+    int left  = maxx/12,
+        top   = maxy/4,
+        right = maxx-N,
+        bottom= maxy-N*4;
     do
     {
 
-    contenedor[jug.m][jug.r][jug.c].e=1;  //Enciende jugador
-    contenedor[jug.m][jug.r][jug.c].color=jug.color;
+        contenedor[jug.m][jug.r][jug.c].e=1;  //Enciende jugador
+        contenedor[jug.m][jug.r][jug.c].color=jug.color;
 
-    contenedor[maq.m][maq.r][maq.c].e=1;  //Enciende maquina
-    contenedor[maq.m][maq.r][maq.c].color=maq.color;
-    setfillstyle(1,0);
-    bar(1,1,maxx/2-1,maxy/2-1);
-    pinta_contenedor(contenedor);
-    delay(100);
-    contenedor[jug.m][jug.r][jug.c].e=0;  //Apaga jugador
-    contenedor[jug.m][jug.r][jug.c].color=0;
-    contenedor[maq.m][maq.r][maq.c].e=0;  //Apaga maq
-    contenedor[maq.m][maq.r][maq.c].color=0;
+        setfillstyle(1,0);
+        bar(left, top, right, bottom);
+        pinta_contenedor(contenedor);
+        contenedor[jug.m][jug.r][jug.c].e=0;  //Apaga jugador
+        contenedor[jug.m][jug.r][jug.c].color=0;
 
-    dir=rand()%6+1;
-    switch(dir)
-    {
-        case 1:
-                 if(maq.r<N-1)
-                   maq.r++;//Arriba
-                 break;
+        if(kbhit()!=0)
+        {
+            switch(tecla = getch())
+            {
+                case 72: dir = 0; break; // Arriba
+                case 75: dir = 1; break; // Izquierda
+                case 77: dir = 2; break; // Derecha
+                case 80: dir = 3; break; // Abajo
+            }
+        }
 
-        case 4:
-                 if(maq.r>0)
-                   maq.r--;//Abajo
-                 break;
-         case 3:
-                 if(maq.c<N-1)
-                   maq.c++;//Arriba
-                 break;
-
-        case 6:
-                 if(maq.c>0)
-                   maq.c--;//Abajo
-                 break;
-        case 5:
-                 if(maq.m<N-1)
-                   maq.m++;//Arriba
-                 break;
-
-        case 2:
-                 if(maq.m>0)
-                   maq.m--;//Abajo
-                 break;
-    }
-
-
-    if(kbhit()!=0)
-    {
-
-
-      tecla=getch();
-      if(tecla==0)
-       tecla=getch();
-      switch(tecla)
-      {
-
-        case 72:
-                 if(jug.r<N-1)
-                   jug.r++;//Arriba
-                 break;
-
-        case 80:
-                 if(jug.r>0)
-                   jug.r--;//Abajo
-                 break;
-         case 77:
-                 if(jug.c<N-1)
-                   jug.c++;//Arriba
-                 break;
-
-        case 75:
-                 if(jug.c>0)
-                   jug.c--;//Abajo
-                 break;
-      }
-    }
+        switch(dir)
+        {
+            case 0:
+                if(jug.m>0)
+                    jug.m--; break;
+            case 1:
+                if(jug.c>0)
+                    jug.c--; break;
+            case 2:
+                if(jug.c<N-1)
+                    jug.c++; break;
+            case 3:
+                if(jug.m<N-1)
+                    jug.m++; break;
+        }
+        delay(80);
     }while(tecla!=27);
-
-
 
 }
 
@@ -208,32 +171,26 @@ void pinta_ambiente(char nombre[100])
     settextstyle(3, HORIZ_DIR, 1);
 
     setcolor(WHITE);
-    rectangle(0,0,maxx,maxy);
-    line(maxx/2,0,maxx/2,maxy/2);
-    line(0,maxy/2,maxx/2,maxy/2);
-    outtextxy(maxx/2+10,10,"Nombre: ");
-    outtextxy(maxx/2+10+textwidth("Nombre:  "),10,nombre);
-    outtextxy(maxx/2+10,60,"Puntos: ");
-    outtextxy(maxx/2+10,110,"Tiempo: ");
 }
 
-void pinta_contenedor(TCubo cont[N][N][N])
+void pinta_contenedor(TCubo cont[N][R][N])
 {
     int i,j,k;
 
     setcolor(WHITE);
-    rectangle(cont[0][N-1][0].x+PROFX,cont[0][N-1][0].y-PROF,cont[0][0][N-1].x+TAM+PROFX,cont[0][0][N-1].y+TAM-PROF);
-    line(cont[0][N-1][0].x+PROFX,cont[0][N-1][0].y-PROF,cont[N-1][N-1][0].x,cont[N-1][N-1][0].y);
+    rectangle(cont[0][R-1][0].x+PROFX,cont[0][R-1][0].y-PROF,cont[0][0][N-1].x+TAM+PROFX,cont[0][0][N-1].y+TAM-PROF);
+    line(cont[0][R-1][0].x+PROFX,cont[0][R-1][0].y-PROF,cont[N-1][R-1][0].x,cont[N-1][R-1][0].y);
     line(cont[0][0][0].x+PROFX,cont[0][0][0].y+TAM-PROF,cont[N-1][0][0].x,cont[N-1][0][0].y+TAM);
     for(i=0;i<N;i++)
-    for(j=0;j<N;j++)
-    for(k=0;k<N;k++)
-     if(cont[k][j][i].e==1)
-       cubo(cont[k][j][i].x,cont[k][j][i].y,cont[k][j][i].color);
-    rectangle(cont[N-1][N-1][0].x,cont[N-1][N-1][0].y,cont[N-1][0][N-1].x+TAM,cont[N-1][0][N-1].y+TAM);
+        for(j=0;j<R;j++)
+            for(k=0;k<N;k++)
+                if(cont[i][j][k].e==1)
+                    cubo(cont[i][j][k].x,cont[i][j][k].y,cont[i][j][k].color);
+    rectangle(cont[N-1][R-1][0].x,cont[N-1][R-1][0].y,cont[N-1][0][N-1].x+TAM,cont[N-1][0][N-1].y+TAM);
     line(cont[0][0][N-1].x+TAM+PROFX,cont[0][0][N-1].y+TAM-PROF,cont[N-1][0][N-1].x+TAM,cont[N-1][0][N-1].y+TAM);
-    line(cont[0][N-1][N-1].x+TAM+PROFX,cont[0][N-1][N-1].y-PROF,cont[N-1][N-1][N-1].x+TAM,cont[N-1][N-1][N-1].y);
+    line(cont[0][R-1][N-1].x+TAM+PROFX,cont[0][R-1][N-1].y-PROF,cont[N-1][R-1][N-1].x+TAM,cont[N-1][R-1][N-1].y);
 }
+
 void animarPac(int tam, int altura)
 {
     int x, ang, aux = 1;
@@ -261,11 +218,11 @@ void portada()
     int tam = 20, // Tamaño del Pac
         altura = 140; // Altura del suelo
 
-    // cielo
+    // Cielo
     setfillstyle(1,0xFF9900);
     bar(0, 0, maxx+1, maxy+1);
 
-    // titulo
+    // Titulo
     int margin = 6;
     String titulo = " PAC-MARIO ";
     settextstyle(10, HORIZ_DIR, 8);
@@ -279,21 +236,21 @@ void portada()
     setcolor(0x40E8FF);
     outtextxy(maxx/2-textwidth(titulo)/2, maxy/8, titulo);
 
-    // tierra
+    // Tierra
     setfillstyle(1,0x336699);
     bar(0, maxy-altura+tam, maxx+1, maxy+1);
 
-    // pasto
+    // Pasto
     setfillstyle(1,0x00CC7A);
     setcolor(0x00CC7A);
     bar(0, maxy-altura+tam, maxx+1, maxy-altura+tam+10);
 
-    // mas tierra
+    // Mas tierra
     int i, tmp = maxy-altura+tam+10;
     for(i=0; i<40000; i++)
         putpixel(rand()%maxx, rand()%maxy+tmp, 0x275078);
 
-    // enter
+    // Enter
     setfillstyle(1,0x00CC7A);
     setcolor(BLACK);
     settextstyle(8, HORIZ_DIR, 2);
