@@ -18,9 +18,7 @@ typedef struct{
 }TCubo;
 
 typedef struct{
-
- int m,r,c,color;
-
+    int m,r,c,color;
 }TJugador;
 
 
@@ -28,7 +26,7 @@ typedef struct{
 void crea_contenedor(int x, int y,  TCubo cont[N][R][N]);
 void cubo(int x, int y, int color);
 void juego(String nombre);
-void pinta_ambiente(String nombre);
+void pinta_ambiente(char nombre[100]);
 void pinta_contenedor(TCubo cont[N][R][N]);
 
 // Funciones de portada
@@ -36,7 +34,8 @@ void animarPac(int tam, int altura);
 void portada();
 
 // Variables globales.
-int maxx, maxy; // Evita repetir la funcion getmaxN() cada vez que se llama en un ciclo.
+int maxx, maxy, // Evita repetir la funcion getmaxN() cada vez que se llama en un ciclo.
+    suelo[8]; // Coordenadas de la plataforma de juego, comenzado en la izquierda-arriba, izquierda-abajo ...
 
 int main()
 {
@@ -66,17 +65,28 @@ void crea_contenedor(int x, int y,TCubo cont[N][R][N])
     {
         cont[i][j][k].x = x+k*TAM-i*PROFX;
         cont[i][j][k].y = y-j*TAM+i*PROF;
-        cont[i][j][k].color = 5;
+        cont[i][j][k].color = 0x009966;
         cont[i][j][k].e = 0;
+        //cont[i][j][k].e = ( i%6 && k%4 && j == 0)?1:0;
+        if(i==5 && j == 0 && k == 3)
+            cont[i][j][k].e = 1;
     }
 
+    suelo[0] = cont[0][0][0].x+PROFX;
+    suelo[1] = cont[0][0][0].y+TAM-PROF;
+    suelo[2] = cont[N-1][0][0].x;
+    suelo[3] = cont[N-1][0][0].y+TAM;
+    suelo[4] = cont[N-1][0][N-1].x+TAM;
+    suelo[5] = cont[N-1][0][N-1].y+TAM;
+    suelo[6] = cont[0][0][N-1].x+TAM+PROFX;
+    suelo[7] = cont[0][0][N-1].y+TAM-PROF;
 }
 
 void cubo(int x, int y, int color)
 {
     int puntos[8];
 
-    setcolor(15);
+    setcolor(0x2DC501);
     setfillstyle(1,color);
 
     //Cara frontal
@@ -107,31 +117,48 @@ void cubo(int x, int y, int color)
 void juego(char nombre[100])
 {
     int tecla,dir;
+    srand(time(NULL));
 
     TCubo contenedor[N][R][N];
-    TJugador jug={0,0,0,0x00ffff};
-    srand(time(NULL));
-    crea_contenedor(maxx/2-maxy/4,maxy/3,contenedor);
+    TJugador jug = {0,0,0,0x00ffff};
+    TJugador maq = {N/2, 0, N/2, 0x532FFF};
+    crea_contenedor(maxx/2-maxy/4,maxy/8*3,contenedor);
     pinta_contenedor(contenedor);
 
-    //pinta_ambiente(nombre);
-
-    int left  = maxx/12,
-        top   = maxy/4,
-        right = maxx-N,
-        bottom= maxy-N*4;
     do
     {
 
         contenedor[jug.m][jug.r][jug.c].e=1;  //Enciende jugador
         contenedor[jug.m][jug.r][jug.c].color=jug.color;
+        contenedor[maq.m][maq.r][maq.c].e=1;  //Enciende maquina
+        contenedor[maq.m][maq.r][maq.c].color=maq.color;
 
-        setfillstyle(1,0);
-        bar(left, top, right, bottom);
         pinta_contenedor(contenedor);
         contenedor[jug.m][jug.r][jug.c].e=0;  //Apaga jugador
         contenedor[jug.m][jug.r][jug.c].color=0;
+        contenedor[maq.m][maq.r][maq.c].e=0;  //Apaga maq
+        contenedor[maq.m][maq.r][maq.c].color=0;
 
+        int dirm=rand()%4+1; // Direccion de la maquina
+        switch(dirm)
+        {
+            case 1:
+                     if(maq.m>0)
+                       maq.m--; // Abajo
+                     break;
+            case 2:
+                     if(maq.m<N-1)
+                       maq.m++; // Arriba
+                     break;
+            case 3:
+                     if(maq.c<N-1)
+                       maq.c++; // Derecha
+                     break;
+            case 4:
+                     if(maq.c>0)
+                       maq.c--; // Izquierda
+                     break;
+        }
         if(kbhit()!=0)
         {
             switch(tecla = getch())
@@ -146,49 +173,63 @@ void juego(char nombre[100])
         switch(dir)
         {
             case 0:
-                if(jug.m>0)
-                    jug.m--; break;
+                if(jug.m>0 && (jug.c != 3 || jug.m != 6))
+                    jug.m--;
+                else if(jug.m == 0 && jug.c == N-1)
+                {
+                    jug.c = 0;
+                    jug.m = N-1;
+                }
+                break;
             case 1:
-                if(jug.c>0)
+                if(jug.c>0 && (jug.c != 4 || jug.m != 5))
                     jug.c--; break;
             case 2:
-                if(jug.c<N-1)
+                if(jug.c<N-1 && (jug.c != 2 || jug.m != 5))
                     jug.c++; break;
             case 3:
-                if(jug.m<N-1)
-                    jug.m++; break;
+                if(jug.m<N-1 && (jug.c != 3 || jug.m != 4))
+                    jug.m++;
+                else if(jug.m == N-1 && jug.c == 0)
+                {
+                    jug.c = N-1;
+                    jug.m = 0;
+                }
+                    break;
         }
-        delay(80);
+        delay(120);
     }while(tecla!=27);
 
 }
 
 void pinta_ambiente(char nombre[100])
 {
-    cleardevice();
- // setlinestyle(1,0,3);
 
-    settextstyle(3, HORIZ_DIR, 1);
-
-    setcolor(WHITE);
 }
 
 void pinta_contenedor(TCubo cont[N][R][N])
 {
     int i,j,k;
 
-    setcolor(WHITE);
-    rectangle(cont[0][R-1][0].x+PROFX,cont[0][R-1][0].y-PROF,cont[0][0][N-1].x+TAM+PROFX,cont[0][0][N-1].y+TAM-PROF);
-    line(cont[0][R-1][0].x+PROFX,cont[0][R-1][0].y-PROF,cont[N-1][R-1][0].x,cont[N-1][R-1][0].y);
-    line(cont[0][0][0].x+PROFX,cont[0][0][0].y+TAM-PROF,cont[N-1][0][0].x,cont[N-1][0][0].y+TAM);
+    // Cielo
+    setfillstyle(1, 0xCCCC33);
+    bar(0, 0, maxx+1, suelo[1]);
+
+    // Pasto
+    setcolor(0x31D301);
+    setfillstyle(1, 0x31D301);
+    bar(0, suelo[1], maxx+1, maxy+1);
+
+    // Zona de juego
+    setcolor(0x31D301);
+    setfillstyle(1, 0x2DC501);
+    fillpoly(4,suelo);
+
     for(i=0;i<N;i++)
         for(j=0;j<R;j++)
             for(k=0;k<N;k++)
                 if(cont[i][j][k].e==1)
                     cubo(cont[i][j][k].x,cont[i][j][k].y,cont[i][j][k].color);
-    rectangle(cont[N-1][R-1][0].x,cont[N-1][R-1][0].y,cont[N-1][0][N-1].x+TAM,cont[N-1][0][N-1].y+TAM);
-    line(cont[0][0][N-1].x+TAM+PROFX,cont[0][0][N-1].y+TAM-PROF,cont[N-1][0][N-1].x+TAM,cont[N-1][0][N-1].y+TAM);
-    line(cont[0][R-1][N-1].x+TAM+PROFX,cont[0][R-1][N-1].y-PROF,cont[N-1][R-1][N-1].x+TAM,cont[N-1][R-1][N-1].y);
 }
 
 void animarPac(int tam, int altura)
