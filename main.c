@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <stdio.h>
 #include <conio.h>
 #include <time.h>
@@ -5,7 +6,7 @@
 #include <time.h>
 
 #define N 25
-#define R 2 // Renglones de altura
+#define R 1 // Renglones de altura
 #define TAM 20
 #define PROF TAM/2
 #define PROFX 3*PROF/4
@@ -22,14 +23,15 @@ typedef struct{
 }TJugador;
 
 
-// Funciones del juego
+// Funciones del juego.
 void crea_contenedor(int x, int y,  TCubo cont[N][R][N]);
 void cubo(int x, int y, int color);
+void girar(TCubo cubo[N][R][N], int derecha);
 void juego(String nombre);
 void pinta_ambiente(char nombre[100]);
 void pinta_contenedor(TCubo cont[N][R][N]);
 
-// Funciones de portada
+// Funciones de portada.
 void animarPac(int tam, int altura);
 void portada();
 
@@ -55,22 +57,22 @@ int main()
     return(0);
 }
 
-void crea_contenedor(int x, int y,TCubo cont[N][R][N])
+void crea_contenedor(int x, int y, TCubo cont[N][R][N])
 {
-  int i,j,k;
-
-  for(i=0;i<N;i++)
-   for(j=0;j<R;j++)
-    for(k=0;k<N;k++)
-    {
-        cont[i][j][k].x = x+k*TAM-i*PROFX;
-        cont[i][j][k].y = y-j*TAM+i*PROF;
-        cont[i][j][k].color = 0x009966;
-        cont[i][j][k].e = 0;
-        //cont[i][j][k].e = ( i%6 && k%4 && j == 0)?1:0;
-        if(i==5 && j == 0 && k == 3)
-            cont[i][j][k].e = 1;
-    }
+    int i,j,k, existes[N*N];
+    FILE *campo;
+    campo = fopen("escenario.txt", "r");
+    int c;
+    for(i=0;i<N;i++)
+        for(j=0;j<R;j++)
+            for(k=0;k<N;k++)
+            {
+                c = fgetc(campo);
+                cont[i][j][k].x = x+k*TAM-i*PROFX;
+                cont[i][j][k].y = y-j*TAM+i*PROF;
+                cont[i][j][k].e = c-48;//(i%3==0 && k%6==0 && j==0)?1:0;;
+                cont[i][j][k].color = 0x0052BF;
+            }
 
     suelo[0] = cont[0][0][0].x+PROFX;
     suelo[1] = cont[0][0][0].y+TAM-PROF;
@@ -113,10 +115,30 @@ void cubo(int x, int y, int color)
     puntos[7]= y-PROF;
     fillpoly(4,puntos);
 }
+void girar(TCubo cubo[N][R][N], int derecha)
+{
+    int aux[N][R][N], m, c;
 
+    if(derecha)
+    {
+        for(m=0;m<N;m++)
+            for(c=0;c<N;c++)
+                aux[m][0][c] = cubo[c][0][m].e;
+    } else {
+        for(m=0;m<N;m++)
+            for(c=0;c<N;c++)
+                aux[m][0][c] = cubo[c][0][m].e;
+    }
+
+    for(m=0;m<N;m++)
+        for(c=0;c<N;c++)
+            cubo[m][0][c].e = aux[m][0][c];
+}
 void juego(char nombre[100])
 {
-    int tecla,dir;
+    int aux,
+        tecla,
+        derecha = 1; // 1 gira derecha, 0 izquierda
     srand(time(NULL));
 
     TCubo contenedor[N][R][N];
@@ -135,69 +157,76 @@ void juego(char nombre[100])
 
         pinta_contenedor(contenedor);
         contenedor[jug.m][jug.r][jug.c].e=0;  //Apaga jugador
-        contenedor[jug.m][jug.r][jug.c].color=0;
         contenedor[maq.m][maq.r][maq.c].e=0;  //Apaga maq
-        contenedor[maq.m][maq.r][maq.c].color=0;
 
         int dirm=rand()%4+1; // Direccion de la maquina
         switch(dirm)
         {
             case 1:
-                     if(maq.m>0)
+                     if(maq.m>0 && (contenedor[maq.m-1][maq.r][maq.c].e == 0))
                        maq.m--; // Abajo
                      break;
             case 2:
-                     if(maq.m<N-1)
+                     if(maq.m<N-1 && (contenedor[maq.m+1][maq.r][maq.c].e == 0))
                        maq.m++; // Arriba
                      break;
             case 3:
-                     if(maq.c<N-1)
+                     if(maq.c<N-1 && (contenedor[maq.m][maq.r][maq.c+1].e == 0))
                        maq.c++; // Derecha
                      break;
             case 4:
-                     if(maq.c>0)
+                     if(maq.c>0 && (contenedor[maq.m][maq.r][maq.c-1].e == 0))
                        maq.c--; // Izquierda
                      break;
         }
         if(kbhit()!=0)
         {
-            switch(tecla = getch())
+            /*switch(tecla = getch())
             {
                 case 72: dir = 0; break; // Arriba
                 case 75: dir = 1; break; // Izquierda
                 case 77: dir = 2; break; // Derecha
                 case 80: dir = 3; break; // Abajo
+            }*/
+
+
+
+            switch(tecla = getch())
+            {
+                case 72:
+                    if(jug.m>0 && (contenedor[jug.m-1][jug.r][jug.c].e == 0))
+                        jug.m--;
+                    else if(jug.m == 0 && jug.c == N-1)
+                    {
+                        jug.c = 0;
+                        jug.m = N-1;
+                    }
+                    break;
+                case 75:
+                    if(jug.c>0 && (contenedor[jug.m][jug.r][jug.c-1].e == 0))
+                        jug.c--; break;
+                case 77:
+                    if(jug.c<N-1 && (contenedor[jug.m][jug.r][jug.c+1].e == 0))
+                        jug.c++; break;
+                case 80:
+                    if(jug.m<N-1 && (contenedor[jug.m+1][jug.r][jug.c].e == 0))
+                        jug.m++;
+                    else if(jug.m == N-1 && jug.c == 0)
+                    {
+                        jug.c = N-1;
+                        jug.m = 0;
+                    }
+                    break;
+                case 71: // G
+                case 103: // g
+                    aux = jug.m;
+                    jug.m = jug.c;
+                    jug.c = aux;
+                    girar(contenedor, derecha = !derecha);
+                    break;
             }
         }
-
-        switch(dir)
-        {
-            case 0:
-                if(jug.m>0 && (jug.c != 3 || jug.m != 6))
-                    jug.m--;
-                else if(jug.m == 0 && jug.c == N-1)
-                {
-                    jug.c = 0;
-                    jug.m = N-1;
-                }
-                break;
-            case 1:
-                if(jug.c>0 && (jug.c != 4 || jug.m != 5))
-                    jug.c--; break;
-            case 2:
-                if(jug.c<N-1 && (jug.c != 2 || jug.m != 5))
-                    jug.c++; break;
-            case 3:
-                if(jug.m<N-1 && (jug.c != 3 || jug.m != 4))
-                    jug.m++;
-                else if(jug.m == N-1 && jug.c == 0)
-                {
-                    jug.c = N-1;
-                    jug.m = 0;
-                }
-                    break;
-        }
-        delay(120);
+        delay(10); //delay(60);
     }while(tecla!=27);
 
 }
@@ -219,6 +248,12 @@ void pinta_contenedor(TCubo cont[N][R][N])
     setcolor(0x31D301);
     setfillstyle(1, 0x31D301);
     bar(0, suelo[1], maxx+1, maxy+1);
+    /*int aux = 1, c = 0;
+    for(i=0; i<maxy; i++, c = (c%255 > 100)?c++: c--)
+    {
+        setcolor(COLOR(0, c, 0));
+        line(0, suelo[1]+i, maxx, suelo[1]+i);
+    }*/
 
     // Zona de juego
     setcolor(0x31D301);
@@ -251,7 +286,7 @@ void animarPac(int tam, int altura)
         setcolor(0x00CCFF);
         pieslice(x, maxy-altura, ang, 360-ang, tam);
 
-        delay(3);
+        delay(1);
     }
 }
 void portada()
@@ -262,12 +297,17 @@ void portada()
     // Cielo
     setfillstyle(1,0xFF9900);
     bar(0, 0, maxx+1, maxy+1);
+    setbkcolor(0xFF9900);
+    // Enter
+    setcolor(BLACK);
+    settextstyle(0, HORIZ_DIR, 2);
+    outtextxy(maxx/2-textwidth("Presiona Enter")/2, maxy/2, "Presiona Enter");
 
     // Titulo
     int margin = 6;
     String titulo = " PAC-MARIO ";
     settextstyle(10, HORIZ_DIR, 8);
-    setfillstyle(9,0x40E8FF);
+    setfillstyle(4,0x40E8FF);
     setbkcolor(0x00B6EA);
     bar(
         maxx/2-textwidth(titulo)/2-margin,
@@ -286,25 +326,14 @@ void portada()
     setcolor(0x00CC7A);
     bar(0, maxy-altura+tam, maxx+1, maxy-altura+tam+10);
 
-    // Mas tierra
-    int i, tmp = maxy-altura+tam+10;
-    for(i=0; i<40000; i++)
-        putpixel(rand()%maxx, rand()%maxy+tmp, 0x275078);
-
-    // Enter
-    setfillstyle(1,0x00CC7A);
-    setcolor(BLACK);
-    settextstyle(8, HORIZ_DIR, 2);
-    setbkcolor(0xFF9900);
-    outtextxy(maxx/2-textwidth("Presiona Enter")/2, maxy/2, "Presiona Enter");
-
     while(kbhit()==0)
     {
         time_t tiempo = time(NULL);
         struct tm *tm;
         tm = localtime (&tiempo);
-        if(tm->tm_sec == 15 || tm->tm_sec == 45)
+        int seg = tm->tm_sec;
+        if(seg == 15 || seg == 45 || seg == 30)
             animarPac(tam, altura);
-        delay(500);
+        delay(200);
     }
 }
