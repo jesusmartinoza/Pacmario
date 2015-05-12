@@ -7,8 +7,8 @@
 
 #define TOP 10 // Numero maximo del top.
 #define N 25
-#define R 5 // Renglones de altura
-#define TAM 20
+#define R 1 // Renglones de altura
+#define TAM 21
 #define PROF TAM/2
 #define PROFX 3*PROF/4
 
@@ -28,7 +28,7 @@ typedef struct {
     int puntos;
 } Registro;
 
-// Funciones del jue
+// Funciones del juego
 void guardarRegistro(String nombre, Registro registro);
 void ayuda(String nombre, int x1, int y1, int x2, int y2);
 void crea_contenedor(int x, int y,  TCubo cont[N][R][N]);
@@ -36,8 +36,8 @@ void cubo(int x, int y, int color);
 void girar(TCubo cubo[N][R][N], int derecha);
 void guardarRegistro(Registro registro);
 void imprimeTiempo(int x1, int y1, int x2, int y2, clock_t inicio);
-void juego(String nombre);
-void pinta_ambiente(String nombre, int puntos);
+void juego();
+void pinta_ambiente(int nivel, int puntos);
 void pinta_contenedor(TCubo cont[N][R][N]);
 void popup(int puntos);
 
@@ -52,7 +52,7 @@ int maxx, maxy, // Evita repetir la funcion getmaxN() cada vez que se llama en u
 int main()
 {
 
-    initwindow(1024,800,"Pacmario");
+    initwindow(1024,700,"Pacmario");
     maxx = getmaxx();
     maxy = getmaxy();
 
@@ -61,7 +61,7 @@ int main()
 
     // ayuda("ayuda.txt", 0, 0, maxx, maxy);
     setbkcolor(BLACK);
-    juego("Jesús");
+    juego();
     getch();
     closegraph();
     return(0);
@@ -119,7 +119,7 @@ void crea_contenedor(int x, int y, TCubo cont[N][R][N])
                 cont[i][j][k].x = x+k*TAM-i*PROFX;
                 cont[i][j][k].y = y-j*TAM+i*PROF;
                 cont[i][j][k].e = c-48;
-                cont[i][j][k].color = 0x0052BF;
+                cont[i][j][k].color = 0x0861EB; //0x0052BF;
             }
 
     suelo[0] = cont[0][0][0].x+PROFX;
@@ -136,7 +136,7 @@ void cubo(int x, int y, int color)
 {
     int puntos[8];
 
-    setcolor(0x2DC501);
+    setcolor(0x123D9E);//0x2DC501);
     setfillstyle(1,color);
     //Cara frontal
     bar(x,y,x+TAM,y+TAM);
@@ -174,24 +174,24 @@ void girar(TCubo cubo[N][R][N], int derecha)
             for(r=0;r<R;r++)
                 for(c=0;c<N;c++)
                 {
-                    aux[m][0][c] = cubo[c][0][N-1-m].e;
-                    auxC[m][0][c] = cubo[c][0][N-1-m].color;
+                    aux[m][r][c] = cubo[N-1-c][r][m].e;
+                    auxC[m][r][c] = cubo[N-1-c][r][m].color;
                 }
     else
         for(m=0;m<N;m++)
             for(r=0;r<R;r++)
                 for(c=0;c<N;c++)
                 {
-                    aux[m][0][c] = cubo[N-1-c][0][m].e;
-                    auxC[m][0][c] = cubo[N-1-c][0][m].color;
+                    aux[m][r][c] = cubo[N-1-c][r][m].e;
+                    auxC[m][r][c] = cubo[N-1-c][r][m].color;
                 }
 
     for(m=0;m<N;m++)
         for(r=0;r<R;r++)
             for(c=0;c<N;c++)
             {
-                cubo[m][0][c].e = aux[m][0][c];
-                cubo[m][0][c].color = auxC[m][0][c];
+                cubo[m][r][c].e = aux[m][r][c];
+                cubo[m][r][c].color = auxC[m][r][c];
             }
 }
 
@@ -261,7 +261,7 @@ void intextxy(int x, int y, int bkcolor, String texto)
                 outtextxy(xi, y, letra);
             }
         }
-    }while(tecla!=13 && i<15);
+    }while(tecla!=13 && i<7);
     texto[i] = '\0';
 }
 void imprimeTiempo(int x1, int y1, int x2, int y2, clock_t inicio)
@@ -276,7 +276,7 @@ void imprimeTiempo(int x1, int y1, int x2, int y2, clock_t inicio)
     bar(x1, y1, x2,y2);
     outtextxy(x1+5, y1+5, texto);
 }
-void juego(String nombre)
+void juego()
 {
     int aux,
         derecha = 1, // 1 gira derecha, 0 izquierda
@@ -298,7 +298,7 @@ void juego(String nombre)
 
     setactivepage(0);
     pinta_contenedor(contenedor);
-    pinta_ambiente(nombre, puntos);
+    pinta_ambiente(1, puntos);
     setactivepage(1);
     pinta_contenedor(contenedor);
 
@@ -326,7 +326,7 @@ void juego(String nombre)
 
 
         pinta_contenedor(contenedor);
-        pinta_ambiente(nombre, puntos);
+        pinta_ambiente(1, puntos);
 
 
         setvisualpage(np);
@@ -430,14 +430,16 @@ void menu()
         }
     }while(op!=4);
 }
-void pinta_ambiente(String nombre, int puntos)
+void pinta_ambiente(int nivel, int puntos)
 {
     setbkcolor(0xFF9900);
     setfillstyle(1, 0xFF9900);
-    settextstyle(1,HORIZ_DIR, 2);
+    settextstyle(3,HORIZ_DIR, 2);
 
     setcolor(WHITE);
-    outtextxy(textwidth(nombre), 10, nombre);
+    String niv;
+    sprintf(niv, "Nivel %d", nivel);
+    outtextxy(textwidth(niv), 10, niv);
 
     String sPuntos;
     sprintf(sPuntos, "%d", puntos*10);
