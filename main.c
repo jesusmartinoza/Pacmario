@@ -33,7 +33,7 @@ void guardarRegistro(String nombre, Registro registro);
 void ayuda(String nombre, int x1, int y1, int x2, int y2);
 void crea_contenedor(int x, int y,  TCubo cont[N][R][N]);
 void cubo(int x, int y, int color);
-void girar(TCubo cubo[N][R][N], int derecha);
+void girar(TCubo cubo[N][R][N], TJugador enemigos[3], TJugador *pac, int derecha);
 void guardarRegistro(Registro registro);
 void imprimeTiempo(int x1, int y1, int x2, int y2, clock_t inicio);
 void juego();
@@ -108,7 +108,7 @@ void ayuda(String nombre, int x1, int y1, int x2, int y2)
 }
 void crea_contenedor(int x, int y, TCubo cont[N][R][N])
 {
-    int i,j,k, existes[N*N],
+    int i,j,k,
     colores[] = {
         0x3F3122, // NADA
         0x0861EB, // CAFÉ
@@ -182,13 +182,25 @@ void dibujaVidas(int vidas)
     for(i=0; i<vidas; i++)
     pieslice(maxx-tam-tam*i, maxy-tam, 40, -40, tam/2);
 }
-void girar(TCubo cubo[N][R][N], int derecha)
+void girar(TCubo cubo[N][R][N], TJugador enemigos[3], TJugador *pac, int derecha)
 {
-    int aux[N][R][N],
-        auxC[N][R][N],
-        m, r, c;
+    int aux[N][R][N],  // Auxiliar para .existe
+        auxC[N][R][N], // Auxiliar para .color
+        m, r, c, auxJ; // Aux para TJugador
 
     if(derecha)
+    {
+        auxJ = pac->m;
+        pac->m = (N-1)-(pac->c);
+        pac->c = auxJ;
+
+        for(m=0;m<3;m++)
+        {
+            auxJ = enemigos[m].m;
+            enemigos[m].m = (N-1)-(enemigos[m].c);
+            enemigos[m].c = auxJ;
+        }
+
         for(m=0;m<N;m++)
             for(r=0;r<R;r++)
                 for(c=0;c<N;c++)
@@ -196,7 +208,17 @@ void girar(TCubo cubo[N][R][N], int derecha)
                     aux[m][r][c] = cubo[c][r][N-1-m].e;
                     auxC[m][r][c] = cubo[c][r][N-1-m].color;
                 }
-    else
+    } else {
+        auxJ = pac->m;
+        pac->m = pac->c;
+        pac->c = N-1-auxJ;
+
+        for(m=0;m<3;m++)
+        {
+            auxJ = enemigos[m].m;
+            enemigos[m].m = enemigos[m].c;
+            enemigos[m].c = N-1-auxJ;
+        }
         for(m=0;m<N;m++)
             for(r=0;r<R;r++)
                 for(c=0;c<N;c++)
@@ -204,6 +226,7 @@ void girar(TCubo cubo[N][R][N], int derecha)
                     aux[m][r][c] = cubo[N-1-c][r][m].e;
                     auxC[m][r][c] = cubo[N-1-c][r][m].color;
                 }
+    }
 
     for(m=0;m<N;m++)
         for(r=0;r<R;r++)
@@ -310,76 +333,33 @@ void juego()
     srand(time(NULL));
 
     TCubo contenedor[N][R][N];
-    TJugador jug = {N/2+2,0,N/2,0x00ffff};
+    TJugador jug = {N/2+7,0,N/2,0x00ffff};
     TJugador bots[3];
     TJugador hongo = {N/2,0,0,0x0000ff};
 
     bots[0] = {5, 0, N-1, 0x532FFF};
-    bots[1] = {N-1, 0, 0, 0xA9C903};
-    bots[2] = {N/2, 0, 0, 0x00ff00};
+    bots[1] = {N/2, 0, 0, 0xA9C903};
+    bots[2] = {N-1, 0, 0, 0x00ff00}; // Tortuga
 
     crea_contenedor(maxx/2-maxy/4,maxy/8*3,contenedor);
 
     setvisualpage(np);
     do
     {
-         // Si tocas el hongo son 500 puntos.
-        /* if(!hongoCatch && jug.c == hongo.c && jug.m == hongo.m)
-        {
-            hongoCatch = 1;
-            puntos+=500;
-        } else {
-            // Enciende hongo
-            contenedor[hongo.m][hongo.r][hongo.c].e=1;
-            contenedor[hongo.m][hongo.r][hongo.c].color=hongo.color;
-            int dirm=rand()%4+1; // Direccion del hongo
-            switch(dirm)
-            {
-                case 1:
-                         if(hongo.m>0 && (contenedor[hongo.m-1][hongo.r][hongo.c].e == 0))
-                           hongo.m--; // Abajo
-                         break;
-                case 2:
-                         if(hongo.m<N-1 && (contenedor[hongo.m+1][hongo.r][hongo.c].e == 0))
-                           hongo.m++; // Arriba
-                         break;
-                case 3:
-                         if(hongo.c<N-1 && (contenedor[hongo.m][hongo.r][hongo.c+1].e == 0))
-                           hongo.c++; // Derecha
-                         break;
-                case 4:
-                         if(hongo.c>0 && (contenedor[hongo.m][hongo.r][hongo.c-1].e == 0))
-                           hongo.c--; // Izquierda
-                         break;
-            }
-        }*/
-
         // Encender bots y salir cuando toquen al pac.
-        for(i=0;i<3; i++)
+        for(i=0;i<2; i++)
         {
             // Variable para crear un retraso en los bots.
             if((retraso>10000?0:retraso++)%5==0)
             {
-                if(i==2)
-                {
-                    if((bots[i].m - jug.m > 0) && (contenedor[bots[i].m-1][bots[i].r][bots[i].c].e == 0))
-                        bots[i].m--;
-                    else if((bots[i].m - jug.m < 0) && (contenedor[bots[i].m+1][bots[i].r][bots[i].c].e == 0))
-                        bots[i].m++;
-                    else if((bots[i].c - jug.c > 0) && (contenedor[bots[i].m][bots[i].r][bots[i].c-1].e == 0))
-                        bots[i].c--;
-                    else if((bots[i].c - jug.c < 0) && (contenedor[bots[i].m][bots[i].r][bots[i].c+1].e == 0))
-                        bots[i].c++;
-                } else {
-                    if((bots[i].c - jug.c > 0) && (contenedor[bots[i].m][bots[i].r][bots[i].c-1].e == 0))
-                        bots[i].c--;
-                    else if((bots[i].c - jug.c < 0) && (contenedor[bots[i].m][bots[i].r][bots[i].c+1].e == 0))
-                        bots[i].c++;
-                    else if((bots[i].m - jug.m > 0) && (contenedor[bots[i].m-1][bots[i].r][bots[i].c].e == 0))
-                        bots[i].m--;
-                    else if((bots[i].m - jug.m < 0) && (contenedor[bots[i].m+1][bots[i].r][bots[i].c].e == 0))
-                        bots[i].m++;
-                }
+                if((bots[i].c - jug.c > 0) && (contenedor[bots[i].m][bots[i].r][bots[i].c-1].e == 0))
+                    bots[i].c--;
+                else if((bots[i].c - jug.c < 0) && (contenedor[bots[i].m][bots[i].r][bots[i].c+1].e == 0))
+                    bots[i].c++;
+                else if((bots[i].m - jug.m > 0) && (contenedor[bots[i].m-1][bots[i].r][bots[i].c].e == 0))
+                    bots[i].m--;
+                else if((bots[i].m - jug.m < 0) && (contenedor[bots[i].m+1][bots[i].r][bots[i].c].e == 0))
+                    bots[i].m++;
             }
 
             contenedor[bots[i].m][bots[i].r][bots[i].c].e=1;
@@ -390,23 +370,49 @@ void juego()
                 vidas--;
                 contenedor[bots[0].m][0][bots[0].c].e = 0;
                 contenedor[bots[1].m][0][bots[1].c].e = 0;
-                contenedor[bots[2].m][0][bots[2].c].e = 0;
                 bots[0].m = 5;
                 bots[0].c = N-1;
-                bots[1].m = N-1;
+                bots[1].m = N/2;
                 bots[1].c = 0;
-                bots[2].m = N/2;
+                bots[2].m = N-1;
                 bots[2].c = 0;
-
-                jug.m = N/2+2;
+                jug.m = N/2+7;
                 jug.c = N/2;
                 break;
             }
         }
-
+        if(bots[2].m == jug.m && bots[2].c == jug.c )
+        {
+            vidas--;
+            contenedor[bots[0].m][0][bots[0].c].e = 0;
+            contenedor[bots[1].m][0][bots[1].c].e = 0;
+            bots[0].m = 5;
+            bots[0].c = N-1;
+            bots[1].m = N/2;
+            bots[1].c = 0;
+            bots[2].m = N-1;
+            bots[2].c = 0;
+            jug.m = N/2+7;
+            jug.c = N/2;
+        }
+        // Enciende tortuga
+        if((retraso>10000?0:retraso++)%5==0)
+        {
+            if((bots[2].m - jug.m > 0) && (contenedor[bots[2].m-1][bots[2].r][bots[2].c].e == 0))
+                bots[2].m--;
+            else if((bots[2].m - jug.m < 0) && (contenedor[bots[2].m+1][bots[2].r][bots[2].c].e == 0))
+                bots[2].m++;
+            else if((bots[2].c - jug.c > 0) && (contenedor[bots[2].m][bots[2].r][bots[2].c-1].e == 0))
+                bots[2].c--;
+            else if((bots[2].c - jug.c < 0) && (contenedor[bots[2].m][bots[2].r][bots[2].c+1].e == 0))
+                bots[2].c++;
+        }
         // Enciende jugador
         contenedor[jug.m][jug.r][jug.c].e=1;
         contenedor[jug.m][jug.r][jug.c].color=jug.color;
+        contenedor[bots[2].m][bots[2].r][bots[2].c].e=1;
+        contenedor[bots[2].m][bots[2].r][bots[2].c].color=bots[2].color;
+
         setactivepage(np=!np);
 
         pinta_contenedor(contenedor);
@@ -435,7 +441,7 @@ void juego()
             {
                 case 71: // G
                 case 103: // g
-                    girar(contenedor, derecha = !derecha);
+                    girar(contenedor, bots, &jug, derecha = !derecha);
                     puntos++;
                     break;
                 case 72:
@@ -558,7 +564,26 @@ void popup(int puntos)
     Registro r = {"nombre", puntos};
     guardarRegistro(r);
 }
+int validaPosicion(TJugador pac, TJugador enemigo, TJugador)
+{
+    int resta = 0;
+    /*if(pac.m == enemigo.m && pac.c == enemigo.c )
+    {
+        resta = -1;
+        contenedor[bots[0].m][0][bots[0].c].e = 0;
+        contenedor[bots[1].m][0][bots[1].c].e = 0;
+        bots[0].m = 5;
+        bots[0].c = N-1;
+        bots[1].m = N-1;
+        bots[1].c = 0;
+        tortuga.m = N/2;
+        tortuga.c = 0;
+        jug.m = N/2+7;
+        jug.c = N/2;
+    }*/
 
+    return resta;
+}
 // Funciones de la portada
 void animarPac(int tam, int altura)
 {
