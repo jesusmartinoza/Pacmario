@@ -313,10 +313,10 @@ void juego()
     TJugador jug = {N/2+2,0,N/2,0x00ffff};
     TJugador bots[3];
     TJugador hongo = {N/2,0,0,0x0000ff};
-    TJugador tortuga = {N/2, 0, 0, 0x00ff00};
 
     bots[0] = {5, 0, N-1, 0x532FFF};
     bots[1] = {N-1, 0, 0, 0xA9C903};
+    bots[2] = {N/2, 0, 0, 0x00ff00};
 
     crea_contenedor(maxx/2-maxy/4,maxy/8*3,contenedor);
 
@@ -355,19 +355,31 @@ void juego()
         }*/
 
         // Encender bots y salir cuando toquen al pac.
-        for(i=0;i<2; i++)
+        for(i=0;i<3; i++)
         {
             // Variable para crear un retraso en los bots.
             if((retraso>10000?0:retraso++)%5==0)
             {
-                if((bots[i].c - jug.c > 0) && (contenedor[bots[i].m][bots[i].r][bots[i].c-1].e == 0))
-                    bots[i].c--;
-                else if((bots[i].c - jug.c < 0) && (contenedor[bots[i].m][bots[i].r][bots[i].c+1].e == 0))
-                    bots[i].c++;
-                else if((bots[i].m - jug.m > 0) && (contenedor[bots[i].m-1][bots[i].r][bots[i].c].e == 0))
-                    bots[i].m--;
-                else if((bots[i].m - jug.m < 0) && (contenedor[bots[i].m+1][bots[i].r][bots[i].c].e == 0))
-                    bots[i].m++;
+                if(i==2)
+                {
+                    if((bots[i].m - jug.m > 0) && (contenedor[bots[i].m-1][bots[i].r][bots[i].c].e == 0))
+                        bots[i].m--;
+                    else if((bots[i].m - jug.m < 0) && (contenedor[bots[i].m+1][bots[i].r][bots[i].c].e == 0))
+                        bots[i].m++;
+                    else if((bots[i].c - jug.c > 0) && (contenedor[bots[i].m][bots[i].r][bots[i].c-1].e == 0))
+                        bots[i].c--;
+                    else if((bots[i].c - jug.c < 0) && (contenedor[bots[i].m][bots[i].r][bots[i].c+1].e == 0))
+                        bots[i].c++;
+                } else {
+                    if((bots[i].c - jug.c > 0) && (contenedor[bots[i].m][bots[i].r][bots[i].c-1].e == 0))
+                        bots[i].c--;
+                    else if((bots[i].c - jug.c < 0) && (contenedor[bots[i].m][bots[i].r][bots[i].c+1].e == 0))
+                        bots[i].c++;
+                    else if((bots[i].m - jug.m > 0) && (contenedor[bots[i].m-1][bots[i].r][bots[i].c].e == 0))
+                        bots[i].m--;
+                    else if((bots[i].m - jug.m < 0) && (contenedor[bots[i].m+1][bots[i].r][bots[i].c].e == 0))
+                        bots[i].m++;
+                }
             }
 
             contenedor[bots[i].m][bots[i].r][bots[i].c].e=1;
@@ -378,33 +390,23 @@ void juego()
                 vidas--;
                 contenedor[bots[0].m][0][bots[0].c].e = 0;
                 contenedor[bots[1].m][0][bots[1].c].e = 0;
+                contenedor[bots[2].m][0][bots[2].c].e = 0;
                 bots[0].m = 5;
                 bots[0].c = N-1;
                 bots[1].m = N-1;
                 bots[1].c = 0;
+                bots[2].m = N/2;
+                bots[2].c = 0;
+
                 jug.m = N/2+2;
                 jug.c = N/2;
                 break;
             }
         }
-        // Enciende tortuga
-        if((retraso>10000?0:retraso++)%5==0)
-        {
-            if((tortuga.m - jug.m > 0) && (contenedor[tortuga.m-1][tortuga.r][tortuga.c].e == 0))
-                tortuga.m--;
-            else if((tortuga.m - jug.m < 0) && (contenedor[tortuga.m+1][tortuga.r][tortuga.c].e == 0))
-                tortuga.m++;
-            else if((tortuga.c - jug.c > 0) && (contenedor[tortuga.m][tortuga.r][tortuga.c-1].e == 0))
-                tortuga.c--;
-            else if((tortuga.c - jug.c < 0) && (contenedor[tortuga.m][tortuga.r][tortuga.c+1].e == 0))
-                tortuga.c++;
-        }
+
         // Enciende jugador
         contenedor[jug.m][jug.r][jug.c].e=1;
         contenedor[jug.m][jug.r][jug.c].color=jug.color;
-        contenedor[tortuga.m][tortuga.r][tortuga.c].e=1;
-        contenedor[tortuga.m][tortuga.r][tortuga.c].color=tortuga.color;
-
         setactivepage(np=!np);
 
         pinta_contenedor(contenedor);
@@ -415,9 +417,8 @@ void juego()
         setvisualpage(np);
         contenedor[jug.m][jug.r][jug.c].e=0;  // Apaga jugador
         contenedor[hongo.m][hongo.r][hongo.c].e=0;  // Apaga hongo
-        contenedor[tortuga.m][tortuga.r][tortuga.c].e=0;  // Apaga tortuga
 
-        for(i=0; i<2; i++)
+        for(i=0; i<3; i++)
             contenedor[bots[i].m][bots[i].r][bots[i].c].e=0;  // Apaga bots
 
         if(kbhit()!=0)
