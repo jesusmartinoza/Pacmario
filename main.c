@@ -43,6 +43,7 @@ void popup(int puntos);
 
 // Funciones de portada.
 void animarPac(int tam, int altura);
+void menu();
 void portada();
 
 // Variables globales.
@@ -57,10 +58,9 @@ int main()
     maxy = getmaxy();
 
     srand(time(NULL));
-    portada();
+    // portada();
 
     // ayuda("ayuda.txt", 0, 0, maxx, maxy);
-    setbkcolor(BLACK);
     juego();
     getch();
     closegraph();
@@ -290,11 +290,12 @@ void imprimeTiempo(int x1, int y1, int x2, int y2, clock_t inicio)
 }
 void juego()
 {
-    int aux,
-        derecha = 0, // Giro: 0 izquierda, 1 derecha.
+    int derecha = 0, // Giro: 0 izquierda, 1 derecha.
+        hongoCatch = 0, // Bandera para hongo.
         np = 0, // Paginacion
         i = 0,
         puntos = 0,
+        retraso = 0, // Crear un retraso en los bots.
         salir = 0, // Bandera para salir del juego.
         tecla;
     srand(time(NULL));
@@ -302,6 +303,7 @@ void juego()
     TCubo contenedor[N][R][N];
     TJugador jug = {N/2+2,0,N/2,0x00ffff};
     TJugador bots[2];
+    TJugador hongo = {N/2,0,0,0x0000ff};
 
     bots[0] = {5, 0, N-1, 0x532FFF};
     bots[1] = {N-1, 0, 0, 0xA9C903};
@@ -311,17 +313,52 @@ void juego()
     setvisualpage(np);
     do
     {
+         // Si tocas el hongo son 500 puntos.
+        if(!hongoCatch && jug.c == hongo.c && jug.m == hongo.m)
+        {
+            hongoCatch = 1;
+            puntos+=500;
+        } else {
+            // Enciende hongo
+            contenedor[hongo.m][hongo.r][hongo.c].e=1;
+            contenedor[hongo.m][hongo.r][hongo.c].color=hongo.color;
+            int dirm=rand()%4+1; // Direccion del hongo
+            switch(dirm)
+            {
+                case 1:
+                         if(hongo.m>0 && (contenedor[hongo.m-1][hongo.r][hongo.c].e == 0))
+                           hongo.m--; // Abajo
+                         break;
+                case 2:
+                         if(hongo.m<N-1 && (contenedor[hongo.m+1][hongo.r][hongo.c].e == 0))
+                           hongo.m++; // Arriba
+                         break;
+                case 3:
+                         if(hongo.c<N-1 && (contenedor[hongo.m][hongo.r][hongo.c+1].e == 0))
+                           hongo.c++; // Derecha
+                         break;
+                case 4:
+                         if(hongo.c>0 && (contenedor[hongo.m][hongo.r][hongo.c-1].e == 0))
+                           hongo.c--; // Izquierda
+                         break;
+            }
+        }
+
         // Encender bots y salir cuando toquen al pac.
         for(i=0;i<2; i++)
         {
-            if((bots[i].c - jug.c > 0) && (contenedor[bots[i].m][bots[i].r][bots[i].c-1].e == 0))
-                bots[i].c--;
-            else if((bots[i].c - jug.c < 0) && (contenedor[bots[i].m][bots[i].r][bots[i].c+1].e == 0))
-                bots[i].c++;
-            else if((bots[i].m - jug.m > 0) && (contenedor[bots[i].m-1][bots[i].r][bots[i].c].e == 0))
-                bots[i].m--;
-            else if((bots[i].m - jug.m < 0) && (contenedor[bots[i].m+1][bots[i].r][bots[i].c].e == 0))
-                bots[i].m++;
+            // Variable para crear un retraso en los bots.
+            if((retraso>10000?0:retraso++)%5==0)
+            {
+                if((bots[i].c - jug.c > 0) && (contenedor[bots[i].m][bots[i].r][bots[i].c-1].e == 0))
+                    bots[i].c--;
+                else if((bots[i].c - jug.c < 0) && (contenedor[bots[i].m][bots[i].r][bots[i].c+1].e == 0))
+                    bots[i].c++;
+                else if((bots[i].m - jug.m > 0) && (contenedor[bots[i].m-1][bots[i].r][bots[i].c].e == 0))
+                    bots[i].m--;
+                else if((bots[i].m - jug.m < 0) && (contenedor[bots[i].m+1][bots[i].r][bots[i].c].e == 0))
+                    bots[i].m++;
+            }
 
             contenedor[bots[i].m][bots[i].r][bots[i].c].e=1;
             contenedor[bots[i].m][bots[i].r][bots[i].c].color=bots[i].color;
@@ -334,24 +371,22 @@ void juego()
                 salir = 0;
         }
 
-        //Enciende jugador
+        // Enciende jugador
         contenedor[jug.m][jug.r][jug.c].e=1;
         contenedor[jug.m][jug.r][jug.c].color=jug.color;
 
-        np=!np;
-        setactivepage(np);
-
+        setactivepage(np=!np);
 
         pinta_contenedor(contenedor);
         pinta_ambiente(1, puntos);
 
 
         setvisualpage(np);
-        contenedor[jug.m][jug.r][jug.c].e=0;  //Apaga jugador
+        contenedor[jug.m][jug.r][jug.c].e=0;  // Apaga jugador
+        contenedor[hongo.m][hongo.r][hongo.c].e=0;  // Apaga hongo
 
         for(i=0; i<2; i++)
-            contenedor[bots[i].m][bots[i].r][bots[i].c].e=0;  //Apaga bots
-
+            contenedor[bots[i].m][bots[i].r][bots[i].c].e=0;  // Apaga bots
 
         if(kbhit()!=0)
         {
@@ -402,25 +437,7 @@ void juego()
 
     popup(puntos);
 }
-void menu()
-{
-    int op, xm, ym;
-    do
-    {
-        rectangle(100, 100, 300, 200);
-        outtextxy(120, 110, "Juego");
-        rectangle(100, 200, 300, 250);
-        outtextxy(120, 210, "Record");
-        rectangle(100, 300, 300, 300);
-        outtextxy(120, 310, "Ayuda");
-        while(!ismouseclick(WM_LBUTTONDOWN))
-        {
-            getmouseclick(WM_LBUTTONDOWN, xm, ym);
-            if(xm>100 && xm<300 && ym>100 && ym<150)
-                op =1;
-        }
-    }while(op!=4);
-}
+
 void pinta_ambiente(int nivel, int puntos)
 {
     setbkcolor(0xFF9900);
@@ -433,10 +450,16 @@ void pinta_ambiente(int nivel, int puntos)
     outtextxy(textwidth(niv), 10, niv);
 
     String sPuntos;
-    sprintf(sPuntos, "%d", puntos*10);
-    outtextxy(maxx-textwidth("1000")*2, 10, sPuntos);
+    sprintf(sPuntos, "Puntuación: %d", puntos*10);
+    outtextxy(maxx-textwidth("Puntos: 1000")*2, 10, sPuntos);
 
     imprimeTiempo(maxx/2, 10, maxx/2+100, 100, ini);
+
+    // Vidas
+    int tam = 40;
+    setcolor(YELLOW);
+    setfillstyle(1, YELLOW);
+    pieslice(maxx-tam, maxy-tam, 40, -40, tam/2);
 }
 
 void pinta_contenedor(TCubo cont[N][R][N])
@@ -447,7 +470,7 @@ void pinta_contenedor(TCubo cont[N][R][N])
     bar(0, 0, maxx+1, suelo[1]);
 
     /*for(i=0, j=0; i<suelo[1]; i++)
-    {
+    { Esto es un degradado :D
         setcolor(COLOR(0, 0, i%255));
         line(0, i, maxx, i);
     }*/
@@ -529,7 +552,7 @@ void animarPac(int tam, int altura)
         setcolor(0x00CCFF);
         pieslice(x, maxy-altura, ang, 360-ang, tam);
 
-        delay(1);
+        delay(10);
     }
 }
 void dibujo()
@@ -541,10 +564,6 @@ void dibujo()
     setfillstyle(1,0xFF9900);
     bar(0, 0, maxx+1, maxy+1);
     setbkcolor(0xFF9900);
-    // Enter
-    setcolor(BLACK);
-    settextstyle(0, HORIZ_DIR, 2);
-    outtextxy(maxx/2-textwidth("Presiona Enter")/2, maxy/2, "Presiona Enter");
 
     // Titulo
     int margin = 6;
@@ -560,7 +579,7 @@ void dibujo()
     setcolor(0x40E8FF);
     outtextxy(maxx/2-textwidth(titulo)/2, maxy/8, titulo);
 
-    // TierraF5D76E
+    // Tierra
     setfillstyle(1,0x336699);
     bar(0, maxy-altura+tam, maxx+1, maxy+1);
 
@@ -569,12 +588,41 @@ void dibujo()
     setcolor(0x00CC7A);
     bar(0, maxy-altura+tam, maxx+1, maxy-altura+tam+10);
 }
+void menu()
+{
+    int op, xm, ym, i, margin = 10;
+    String opciones[] = {"Jugar", "Top", "Ayuda", "Acerca De"};
+    setbkcolor(0x0066F4);
+    setfillstyle(1, 0x0066F4);
+    setcolor(0x003988);
+    settextstyle(2, HORIZ_DIR, 8);
+
+
+    for(i=0; i<4; i++, margin+=textheight("A")*2)
+    {
+        bar(maxx/2-textwidth(opciones[3])/2-5, maxy/2+margin-10, maxx/2+textwidth(opciones[3])/2+5, maxy/2+margin+textheight(opciones[3])+10);
+        outtextxy(maxx/2-textwidth(opciones[i])/2, maxy/2+margin, opciones[i]);
+    }
+
+    do
+    {
+        while(!ismouseclick(WM_LBUTTONDOWN))
+        {
+            getmouseclick(WM_LBUTTONDOWN, xm, ym);
+                printf("%d %d\n", xm, ym);
+            if(xm>maxx/2-textwidth(opciones[3])/2-5 && xm<maxy/2+margin-10
+               && ym>maxx/2+textwidth(opciones[3])/2+5 && ym<maxy/2+margin+textheight(opciones[3])+10)
+                juego();
+        }
+    }while(op!=4);
+}
 void portada()
 {
     int tam = 20, // Tamaño del Pac
         altura = 140; // Altura del suelo
 
     dibujo();
+    menu();
     while(kbhit()==0)
     {
         time_t tiempo = time(NULL);
@@ -582,7 +630,9 @@ void portada()
         tm = localtime (&tiempo);
         int seg = tm->tm_sec;
         if(seg == 15 || seg == 45 || seg == 30 || seg == 0)
-            animarPac(tam, altura);
+        {
+            animarPac(tam, altura);;
+        }
         delay(200);
     }
 }
