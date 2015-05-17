@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1431899381 source:c:\users\jesúsalberto\documents\pacmario\main.c
+1431899700 source:c:\users\jesúsalberto\documents\pacmario\main.c
 	<stdlib.h>
 	<stdio.h>
 	<conio.h>

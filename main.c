@@ -29,10 +29,10 @@ typedef struct {
 } Registro;
 
 // Funciones del juego
-void guardarRegistro(String nombre, Registro registro);
 void ayuda(String nombre, int x1, int y1, int x2, int y2);
 void crea_contenedor(int x, int y,  TCubo cont[N][R][N]);
 void cubo(int x, int y, int color);
+void dibujaVidas(int vidas);
 void girar(TCubo cubo[N][R][N], TJugador enemigos[3], TJugador *pac, int derecha);
 void guardarRegistro(Registro registro);
 void imprimeTiempo(int x1, int y1, int x2, int y2, clock_t inicio);
@@ -40,7 +40,7 @@ void juego();
 void pinta_ambiente(int nivel, int puntos);
 void pinta_contenedor(TCubo cont[N][R][N]);
 void popup(int puntos);
-void dibujaVidas(int vidas);
+int validaPosicion(TCubo contenedor[N][R][N], TJugador *jug, TJugador bots[3]);
 
 // Funciones de portada.
 void animarPac(int tam, int altura);
@@ -337,8 +337,8 @@ void juego()
     TJugador bots[3];
     TJugador hongo = {N/2,0,0,0x0000ff};
 
-    bots[0] = {5, 0, N-1, 0x532FFF};
-    bots[1] = {N/2, 0, 0, 0xA9C903};
+    bots[0] = {5, 0, N-1, 0x532FFF}; // Rosa
+    bots[1] = {N/2, 0, 0, 0xA9C903}; // Azul
     bots[2] = {N-1, 0, 0, 0x00ff00}; // Tortuga
 
     crea_contenedor(maxx/2-maxy/4,maxy/8*3,contenedor);
@@ -367,34 +367,14 @@ void juego()
 
             if(bots[i].m == jug.m && bots[i].c == jug.c )
             {
-                vidas--;
-                contenedor[bots[0].m][0][bots[0].c].e = 0;
-                contenedor[bots[1].m][0][bots[1].c].e = 0;
-                bots[0].m = 5;
-                bots[0].c = N-1;
-                bots[1].m = N/2;
-                bots[1].c = 0;
-                bots[2].m = N-1;
-                bots[2].c = 0;
-                jug.m = N/2+7;
-                jug.c = N/2;
+                vidas -= validaPosicion(contenedor, &jug, bots);
                 break;
             }
+
         }
+
         if(bots[2].m == jug.m && bots[2].c == jug.c )
-        {
-            vidas--;
-            contenedor[bots[0].m][0][bots[0].c].e = 0;
-            contenedor[bots[1].m][0][bots[1].c].e = 0;
-            bots[0].m = 5;
-            bots[0].c = N-1;
-            bots[1].m = N/2;
-            bots[1].c = 0;
-            bots[2].m = N-1;
-            bots[2].c = 0;
-            jug.m = N/2+7;
-            jug.c = N/2;
-        }
+            vidas -= validaPosicion(contenedor, &jug, bots);
         // Enciende tortuga
         if((retraso>10000?0:retraso++)%5==0)
         {
@@ -564,24 +544,37 @@ void popup(int puntos)
     Registro r = {"nombre", puntos};
     guardarRegistro(r);
 }
-int validaPosicion(TJugador pac, TJugador enemigo, TJugador)
+int validaPosicion(TCubo contenedor[N][R][N], TJugador *jug, TJugador bots[3])
 {
     int resta = 0;
-    /*if(pac.m == enemigo.m && pac.c == enemigo.c )
+    if(contenedor[N-1][0][0].e == 1)
     {
-        resta = -1;
         contenedor[bots[0].m][0][bots[0].c].e = 0;
         contenedor[bots[1].m][0][bots[1].c].e = 0;
+        contenedor[bots[2].m][0][bots[2].c].e = 0;
+        bots[0].m = 0;
+        bots[0].c = 5;
+        bots[1].m = N-1;
+        bots[1].c = N/2;
+        bots[2].m = N-1;
+        bots[2].c = N-1;
+        jug->m = N/2;
+        jug->c = N/2+7;
+        resta = 1;
+    } else {
+        contenedor[bots[0].m][0][bots[0].c].e = 0;
+        contenedor[bots[1].m][0][bots[1].c].e = 0;
+        contenedor[bots[2].m][0][bots[2].c].e = 0;
         bots[0].m = 5;
         bots[0].c = N-1;
-        bots[1].m = N-1;
+        bots[1].m = N/2;
         bots[1].c = 0;
-        tortuga.m = N/2;
-        tortuga.c = 0;
-        jug.m = N/2+7;
-        jug.c = N/2;
-    }*/
-
+        bots[2].m = N-1;
+        bots[2].c = 0;
+        jug->m = N/2+7;
+        jug->c = N/2;
+        resta = 1;
+    }
     return resta;
 }
 // Funciones de la portada
