@@ -184,8 +184,8 @@ void girar(TCubo cubo[N][R][N], int derecha)
             for(r=0;r<R;r++)
                 for(c=0;c<N;c++)
                 {
-                    aux[m][r][c] = cubo[N-1-c][r][m].e;
-                    auxC[m][r][c] = cubo[N-1-c][r][m].color;
+                    aux[m][r][c] = cubo[c][r][N-1-m].e;
+                    auxC[m][r][c] = cubo[c][r][N-1-m].color;
                 }
     else
         for(m=0;m<N;m++)
@@ -239,6 +239,7 @@ void intextxy(int x, int y, int bkcolor, String texto)
     int i = 0, tecla;
     char letra[2];
     settextstyle(8, HORIZ_DIR, 4);
+
     do
     {
         do
@@ -251,6 +252,7 @@ void intextxy(int x, int y, int bkcolor, String texto)
             outtextxy(xi, y, "_");
             delay(100);
         }while(!kbhit());
+
         tecla = getch();
         if(tecla!=13 && tecla!='\b')
         {
@@ -282,15 +284,15 @@ void imprimeTiempo(int x1, int y1, int x2, int y2, clock_t inicio)
 
     actual = clock();
     seg = (actual-inicio)/CLK_TCK;
-    sprintf(texto, "%d:%d", seg/60, seg%60);
+    sprintf(texto, "%d:%02d", seg/60, seg%60);
     bar(x1, y1, x2,y2);
     outtextxy(x1+5, y1+5, texto);
 }
 void juego()
 {
     int aux,
-        derecha = 1, // 1 gira derecha, 0 izquierda
-        np = 0, //Paginacion
+        derecha = 0, // Giro: 0 izquierda, 1 derecha.
+        np = 0, // Paginacion
         i = 0,
         puntos = 0,
         salir = 0, // Bandera para salir del juego.
@@ -301,35 +303,40 @@ void juego()
     TJugador jug = {N/2+2,0,N/2,0x00ffff};
     TJugador bots[2];
 
-    bots[0] = {N-5, 0, N-5, 0x532FFF};
-    bots[1] = {N-3, 0, N-3, 0xA9C903};
+    bots[0] = {5, 0, N-1, 0x532FFF};
+    bots[1] = {N-1, 0, 0, 0xA9C903};
 
     crea_contenedor(maxx/2-maxy/4,maxy/8*3,contenedor);
 
-    setactivepage(0);
-    pinta_contenedor(contenedor);
-    pinta_ambiente(1, puntos);
-    setactivepage(1);
-    pinta_contenedor(contenedor);
-
     setvisualpage(np);
-
     do
     {
-        // Salir cuando toque a los bots
-        for(;i<2; i++)
-            salir = (bots[i].m == jug.m && bots[i].c == jug.c ) ? 1: 0;
+        // Encender bots y salir cuando toquen al pac.
+        for(i=0;i<2; i++)
+        {
+            if((bots[i].c - jug.c > 0) && (contenedor[bots[i].m][bots[i].r][bots[i].c-1].e == 0))
+                bots[i].c--;
+            else if((bots[i].c - jug.c < 0) && (contenedor[bots[i].m][bots[i].r][bots[i].c+1].e == 0))
+                bots[i].c++;
+            else if((bots[i].m - jug.m > 0) && (contenedor[bots[i].m-1][bots[i].r][bots[i].c].e == 0))
+                bots[i].m--;
+            else if((bots[i].m - jug.m < 0) && (contenedor[bots[i].m+1][bots[i].r][bots[i].c].e == 0))
+                bots[i].m++;
+
+            contenedor[bots[i].m][bots[i].r][bots[i].c].e=1;
+            contenedor[bots[i].m][bots[i].r][bots[i].c].color=bots[i].color;
+
+            if(bots[i].m == jug.m && bots[i].c == jug.c )
+            {
+                salir = 1;
+                break;
+            }else
+                salir = 0;
+        }
 
         //Enciende jugador
         contenedor[jug.m][jug.r][jug.c].e=1;
         contenedor[jug.m][jug.r][jug.c].color=jug.color;
-
-        //Enciende maquinas
-        for(i=0;i<2;i++)
-        {
-            contenedor[bots[i].m][bots[i].r][bots[i].c].e=1;
-            contenedor[bots[i].m][bots[i].r][bots[i].c].color=bots[i].color;
-        }
 
         np=!np;
         setactivepage(np);
@@ -341,28 +348,11 @@ void juego()
 
         setvisualpage(np);
         contenedor[jug.m][jug.r][jug.c].e=0;  //Apaga jugador
-        contenedor[bots[1].m][bots[1].r][bots[1].c].e=0;  //Apaga maq
 
-        int dirm=rand()%4+1; // Direccion de la maquina
-        switch(dirm)
-        {
-            case 1:
-                     if(bots[1].m>0 && (contenedor[bots[1].m-1][bots[1].r][bots[1].c].e == 0))
-                       bots[1].m--; // Abajo
-                     break;
-            case 2:
-                     if(bots[1].m<N-1 && (contenedor[bots[1].m+1][bots[1].r][bots[1].c].e == 0))
-                       bots[1].m++; // Arriba
-                     break;
-            case 3:
-                     if(bots[1].c<N-1 && (contenedor[bots[1].m][bots[1].r][bots[1].c+1].e == 0))
-                       bots[1].c++; // Derecha
-                     break;
-            case 4:
-                     if(bots[1].c>0 && (contenedor[bots[1].m][bots[1].r][bots[1].c-1].e == 0))
-                       bots[1].c--; // Izquierda
-                     break;
-        }
+        for(i=0; i<2; i++)
+            contenedor[bots[i].m][bots[i].r][bots[i].c].e=0;  //Apaga bots
+
+
         if(kbhit()!=0)
         {
             /*switch(tecla = getch())
@@ -373,25 +363,21 @@ void juego()
                 case 80: dir = 3; break; // Abajo
             }*/
 
-
-
             switch(tecla = getch())
             {
                 case 71: // G
                 case 103: // g
-                    aux = jug.m;
-                    jug.m = jug.c;
-                    jug.c = aux;
                     girar(contenedor, derecha = !derecha);
                     puntos++;
                     break;
                 case 72:
                     if(jug.m>0 && (contenedor[jug.m-1][jug.r][jug.c].e == 0))
                         jug.m--;
-                    else if(jug.m == 0 && jug.c == N-1)
+                    else if(jug.m == 5 && jug.c == N/2)
                     {
-                        jug.c = 0;
-                        jug.m = N-1;
+                        jug.r = 3;
+                        jug.c = 15;
+                        jug.m = 4;
                     }
                     puntos++;
                     break;
@@ -408,11 +394,6 @@ void juego()
                 case 80:
                     if(jug.m<N-1 && (contenedor[jug.m+1][jug.r][jug.c].e == 0))
                         jug.m++;
-                    else if(jug.m == N-1 && jug.c == 0)
-                    {
-                        jug.c = N-1;
-                        jug.m = 0;
-                    }
                     puntos++;
                     break;
             }
@@ -523,8 +504,7 @@ void popup(int puntos)
     setfillstyle(1, 0x5ADEFF);
     bar(maxx/2-textwidth("Puntuación:")/3+15, maxy/2+65, maxx/2+textwidth("Puntuacion:")/3-15, maxy/2+100);
     intextxy(maxx/2-60, maxy/2+65, 0x5ADEFF, nombre);
-    fflush(stdin);
-    getch();
+
     Registro r = {"nombre", puntos};
     guardarRegistro(r);
 }
@@ -592,8 +572,7 @@ void dibujo()
 void portada()
 {
     int tam = 20, // Tamaño del Pac
-        altura = 140, // Altura del suelo
-        np = 0;
+        altura = 140; // Altura del suelo
 
     dibujo();
     while(kbhit()==0)
@@ -604,7 +583,6 @@ void portada()
         int seg = tm->tm_sec;
         if(seg == 15 || seg == 45 || seg == 30 || seg == 0)
             animarPac(tam, altura);
-        printf("%d ", seg);
         delay(200);
     }
 }
