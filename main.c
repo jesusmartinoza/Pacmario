@@ -40,6 +40,7 @@ void juego();
 void pinta_ambiente(int nivel, int puntos);
 void pinta_contenedor(TCubo cont[N][R][N]);
 void popup(int puntos);
+void dibujaVidas(int vidas);
 
 // Funciones de portada.
 void animarPac(int tam, int altura);
@@ -173,6 +174,14 @@ void cubo(int x, int y, int color)
     fillpoly(4,puntos);
 }
 
+void dibujaVidas(int vidas)
+{
+    int tam = 30, i;
+    setcolor(YELLOW);
+    setfillstyle(1, YELLOW);
+    for(i=0; i<vidas; i++)
+    pieslice(maxx-tam-tam*i, maxy-tam, 40, -40, tam/2);
+}
 void girar(TCubo cubo[N][R][N], int derecha)
 {
     int aux[N][R][N],
@@ -296,14 +305,15 @@ void juego()
         i = 0,
         puntos = 0,
         retraso = 0, // Crear un retraso en los bots.
-        salir = 0, // Bandera para salir del juego.
-        tecla;
+        tecla,
+        vidas = 3;
     srand(time(NULL));
 
     TCubo contenedor[N][R][N];
     TJugador jug = {N/2+2,0,N/2,0x00ffff};
-    TJugador bots[2];
+    TJugador bots[3];
     TJugador hongo = {N/2,0,0,0x0000ff};
+    TJugador tortuga = {N/2, 0, 0, 0x00ff00};
 
     bots[0] = {5, 0, N-1, 0x532FFF};
     bots[1] = {N-1, 0, 0, 0xA9C903};
@@ -314,7 +324,7 @@ void juego()
     do
     {
          // Si tocas el hongo son 500 puntos.
-        if(!hongoCatch && jug.c == hongo.c && jug.m == hongo.m)
+        /* if(!hongoCatch && jug.c == hongo.c && jug.m == hongo.m)
         {
             hongoCatch = 1;
             puntos+=500;
@@ -342,7 +352,7 @@ void juego()
                            hongo.c--; // Izquierda
                          break;
             }
-        }
+        }*/
 
         // Encender bots y salir cuando toquen al pac.
         for(i=0;i<2; i++)
@@ -365,25 +375,47 @@ void juego()
 
             if(bots[i].m == jug.m && bots[i].c == jug.c )
             {
-                salir = 1;
+                vidas--;
+                contenedor[bots[0].m][0][bots[0].c].e = 0;
+                contenedor[bots[1].m][0][bots[1].c].e = 0;
+                bots[0].m = 5;
+                bots[0].c = N-1;
+                bots[1].m = N-1;
+                bots[1].c = 0;
+                jug.m = N/2+2;
+                jug.c = N/2;
                 break;
-            }else
-                salir = 0;
+            }
         }
-
+        // Enciende tortuga
+        if((retraso>10000?0:retraso++)%5==0)
+        {
+            if((tortuga.m - jug.m > 0) && (contenedor[tortuga.m-1][tortuga.r][tortuga.c].e == 0))
+                tortuga.m--;
+            else if((tortuga.m - jug.m < 0) && (contenedor[tortuga.m+1][tortuga.r][tortuga.c].e == 0))
+                tortuga.m++;
+            else if((tortuga.c - jug.c > 0) && (contenedor[tortuga.m][tortuga.r][tortuga.c-1].e == 0))
+                tortuga.c--;
+            else if((tortuga.c - jug.c < 0) && (contenedor[tortuga.m][tortuga.r][tortuga.c+1].e == 0))
+                tortuga.c++;
+        }
         // Enciende jugador
         contenedor[jug.m][jug.r][jug.c].e=1;
         contenedor[jug.m][jug.r][jug.c].color=jug.color;
+        contenedor[tortuga.m][tortuga.r][tortuga.c].e=1;
+        contenedor[tortuga.m][tortuga.r][tortuga.c].color=tortuga.color;
 
         setactivepage(np=!np);
 
         pinta_contenedor(contenedor);
         pinta_ambiente(1, puntos);
+        dibujaVidas(vidas);
 
 
         setvisualpage(np);
         contenedor[jug.m][jug.r][jug.c].e=0;  // Apaga jugador
         contenedor[hongo.m][hongo.r][hongo.c].e=0;  // Apaga hongo
+        contenedor[tortuga.m][tortuga.r][tortuga.c].e=0;  // Apaga tortuga
 
         for(i=0; i<2; i++)
             contenedor[bots[i].m][bots[i].r][bots[i].c].e=0;  // Apaga bots
@@ -433,7 +465,7 @@ void juego()
                     break;
             }
         }
-    }while(tecla!=27 && !salir);
+    }while(tecla!=27 && vidas>=0);
 
     popup(puntos);
 }
@@ -454,12 +486,6 @@ void pinta_ambiente(int nivel, int puntos)
     outtextxy(maxx-textwidth("Puntos: 1000")*2, 10, sPuntos);
 
     imprimeTiempo(maxx/2, 10, maxx/2+100, 100, ini);
-
-    // Vidas
-    int tam = 40;
-    setcolor(YELLOW);
-    setfillstyle(1, YELLOW);
-    pieslice(maxx-tam, maxy-tam, 40, -40, tam/2);
 }
 
 void pinta_contenedor(TCubo cont[N][R][N])
