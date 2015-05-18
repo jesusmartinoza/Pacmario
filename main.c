@@ -485,7 +485,7 @@ void pinta_contenedor(TCubo cont[N][R][N])
     for(i=0;i<N;i++)
         for(j=0;j<R;j++)
             for(k=0;k<N;k++)
-                if(cont[i][j][k].e==1)
+                if(cont[i][j][k].e)
                     cubo(cont[i][j][k].x,cont[i][j][k].y,cont[i][j][k].color);
 }
 void popup(int puntos)
