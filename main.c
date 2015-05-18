@@ -29,13 +29,13 @@ typedef struct {
 } Registro;
 
 // Funciones del juego
-void ayuda(String nombre, int x1, int y1, int x2, int y2);
 void crea_contenedor(int x, int y,  TCubo cont[N][R][N]);
 void cubo(int x, int y, int color);
 void dibujaVidas(int vidas);
 void girar(TCubo cubo[N][R][N], TJugador enemigos[3], TJugador *pac, int derecha);
 void guardarRegistro(Registro registro);
 void imprimeTiempo(int x1, int y1, int x2, int y2, clock_t inicio);
+void intextxy(int x, int y, int bkcolor, String texto);
 void juego();
 void pinta_ambiente(int nivel, int puntos);
 void pinta_contenedor(TCubo cont[N][R][N]);
@@ -44,67 +44,34 @@ int validaPosicion(TCubo contenedor[N][R][N], TJugador *jug, TJugador bots[3]);
 
 // Funciones de portada.
 void animarPac(int tam, int altura);
+void ayuda(String nombre, int x1, int y1, int x2, int y2);
 void menu();
+void ocultar();
 void portada();
+void imprimeRegistro();
 
 // Variables globales.
 int maxx, maxy, // Evita repetir la funcion getmaxN() cada vez que se llama en un ciclo.
     suelo[8]; // Coordenadas de la plataforma de juego, comenzado en la izquierda-arriba, izquierda-abajo ...
     clock_t ini = clock();
+
+/******************************************************************************************
+                             Funciones del juego
+******************************************************************************************/
 int main()
 {
 
     initwindow(1024,700,"Pacmario");
     maxx = getmaxx();
     maxy = getmaxy();
-
-    srand(time(NULL));
-    // portada();
+    //portada();
 
     // ayuda("ayuda.txt", 0, 0, maxx, maxy);
+    imprimeRegistro();
     juego();
     getch();
     closegraph();
     return(0);
-}
-
-void ayuda(String nombre, int x1, int y1, int x2, int y2)
-{
-    FILE *f;
-    String texto;
-    int x, y;
-
-    cleardevice();
-    setcolor(0x0011AA);
-    settextstyle(0, HORIZ_DIR, 2);
-    rectangle(x1, y1, x2, y2);
-
-    f = fopen(nombre, "r");
-
-    if(f == NULL)
-    {
-        outtextxy(x1+((x2-x1)-textwidth("No se encuentra el archivo")/2), (y1-y2)/2, "No se encontró archivo.");
-        getch();getch();
-    } else {
-        y = y1;
-        while(!feof(f))
-        {
-            fgets(texto, 100, f);
-            y += textheight(texto);
-            x = x1 + (((x2-1)-textwidth(texto))/2);
-            outtextxy(x, y, texto);
-            if( y > (y2 - 30))
-            {
-                outtextxy((x2-x1)/2, y2-10, "Presiona una tecla para continuar");
-                getch();getch();
-                cleardevice();
-                rectangle(x1, y1, x2, y2);
-                y = y1;
-            }
-        }
-        getch();getch();
-        fclose(f);
-    }
 }
 void crea_contenedor(int x, int y, TCubo cont[N][R][N])
 {
@@ -240,7 +207,7 @@ void girar(TCubo cubo[N][R][N], TJugador enemigos[3], TJugador *pac, int derecha
 void guardarRegistro(Registro registro)
 {
     FILE *f;
-    Registro jugadores[TOP], j = {"", 0};
+    Registro jugadores[TOP], j = {"-------", 0};
     int i;
     String nombre = "records.dat";
     f = fopen(nombre, "rb+");
@@ -248,12 +215,12 @@ void guardarRegistro(Registro registro)
     {
         f = fopen(nombre, "wb");
         jugadores[0] = registro;
-        for(i=0; i<TOP; i++)
+        for(i=1; i<TOP; i++)
             jugadores[i] = j;
         fwrite(jugadores, sizeof(Registro), TOP, f);
     } else {
         fread(jugadores, sizeof(Registro),TOP, f);
-        for(i=TOP-1; i>0; i--)
+        for(i=TOP-1; i>=0; i--)
             if(registro.puntos >= jugadores[i].puntos)
             {
                 jugadores[i+1] = jugadores[i];
@@ -373,6 +340,7 @@ void juego()
 
         }
 
+        // Validar tortuga
         if(bots[2].m == jug.m && bots[2].c == jug.c )
             vidas -= validaPosicion(contenedor, &jug, bots);
         // Enciende tortuga
@@ -387,7 +355,8 @@ void juego()
             else if((bots[2].c - jug.c < 0) && (contenedor[bots[2].m][bots[2].r][bots[2].c+1].e == 0))
                 bots[2].c++;
         }
-        // Enciende jugador
+
+        // Enciende jugador y tortuga
         contenedor[jug.m][jug.r][jug.c].e=1;
         contenedor[jug.m][jug.r][jug.c].color=jug.color;
         contenedor[bots[2].m][bots[2].r][bots[2].c].e=1;
@@ -422,7 +391,7 @@ void juego()
                 case 71: // G
                 case 103: // g
                     girar(contenedor, bots, &jug, derecha = !derecha);
-                    puntos++;
+                    puntos+=10;
                     break;
                 case 72:
                     if(jug.m>0 && (contenedor[jug.m-1][jug.r][jug.c].e == 0))
@@ -433,22 +402,22 @@ void juego()
                         jug.c = 15;
                         jug.m = 4;
                     }
-                    puntos++;
+                    puntos+=10;
                     break;
                 case 75:
                     if(jug.c>0 && (contenedor[jug.m][jug.r][jug.c-1].e == 0))
                         jug.c--;
-                    puntos++;
+                    puntos+=10;
                     break;
                 case 77:
                     if(jug.c<N-1 && (contenedor[jug.m][jug.r][jug.c+1].e == 0))
                         jug.c++;
-                    puntos++;
+                    puntos+=10;
                     break;
                 case 80:
                     if(jug.m<N-1 && (contenedor[jug.m+1][jug.r][jug.c].e == 0))
                         jug.m++;
-                    puntos++;
+                    puntos+=10;
                     break;
             }
         }
@@ -469,7 +438,7 @@ void pinta_ambiente(int nivel, int puntos)
     outtextxy(textwidth(niv), 10, niv);
 
     String sPuntos;
-    sprintf(sPuntos, "Puntuación: %d", puntos*10);
+    sprintf(sPuntos, "Puntuación: %d", puntos);
     outtextxy(maxx-textwidth("Puntos: 1000")*2, 10, sPuntos);
 
     imprimeTiempo(maxx/2, 10, maxx/2+100, 100, ini);
@@ -483,7 +452,7 @@ void pinta_contenedor(TCubo cont[N][R][N])
     bar(0, 0, maxx+1, suelo[1]);
 
     /*for(i=0, j=0; i<suelo[1]; i++)
-    { Esto es un degradado :D
+    { Esto es un degradado :D ... que afecta el rendimiento :/
         setcolor(COLOR(0, 0, i%255));
         line(0, i, maxx, i);
     }*/
@@ -511,7 +480,7 @@ void popup(int puntos)
     x1 = x2 = (maxx/2);
     y1 = y2 = (maxy/2);
     String pts;
-    sprintf(pts, "%d", puntos*10);
+    sprintf(pts, "%d", puntos);
 
     setfillstyle(1,0x00CCFF);
     for(i=0; i<nRec; x1-=15, y1-=10, x2+=15, y2+=10, i++)
@@ -541,7 +510,9 @@ void popup(int puntos)
     bar(maxx/2-textwidth("Puntuación:")/3+15, maxy/2+65, maxx/2+textwidth("Puntuacion:")/3-15, maxy/2+100);
     intextxy(maxx/2-60, maxy/2+65, 0x5ADEFF, nombre);
 
-    Registro r = {"nombre", puntos};
+    Registro r = {"", 0};
+    strcpy(r.nombre, nombre);
+    r.puntos = puntos;
     guardarRegistro(r);
 }
 int validaPosicion(TCubo contenedor[N][R][N], TJugador *jug, TJugador bots[3])
@@ -577,7 +548,9 @@ int validaPosicion(TCubo contenedor[N][R][N], TJugador *jug, TJugador bots[3])
     }
     return resta;
 }
-// Funciones de la portada
+/******************************************************************************************
+                             Funciones de la portada
+******************************************************************************************/
 void animarPac(int tam, int altura)
 {
     int x, ang, aux = 1;
@@ -598,6 +571,44 @@ void animarPac(int tam, int altura)
         pieslice(x, maxy-altura, ang, 360-ang, tam);
 
         delay(10);
+    }
+}
+void ayuda(String nombre, int x1, int y1, int x2, int y2)
+{
+    FILE *f;
+    String texto;
+    int x, y;
+
+    cleardevice();
+    setcolor(0x0011AA);
+    settextstyle(0, HORIZ_DIR, 2);
+    rectangle(x1, y1, x2, y2);
+
+    f = fopen(nombre, "r");
+
+    if(f == NULL)
+    {
+        outtextxy(x1+((x2-x1)-textwidth("No se encuentra el archivo")/2), (y1-y2)/2, "No se encontró archivo.");
+        getch();getch();
+    } else {
+        y = y1;
+        while(!feof(f))
+        {
+            fgets(texto, 100, f);
+            y += textheight(texto);
+            x = x1 + (((x2-1)-textwidth(texto))/2);
+            outtextxy(x, y, texto);
+            if( y > (y2 - 30))
+            {
+                outtextxy((x2-x1)/2, y2-10, "Presiona una tecla para continuar");
+                getch();getch();
+                cleardevice();
+                rectangle(x1, y1, x2, y2);
+                y = y1;
+            }
+        }
+        getch();getch();
+        fclose(f);
     }
 }
 void dibujo()
@@ -633,10 +644,50 @@ void dibujo()
     setcolor(0x00CC7A);
     bar(0, maxy-altura+tam, maxx+1, maxy-altura+tam+10);
 }
+void imprimeRegistro()
+{
+    ocultar();
+    int i;
+    String nombre = "records.dat",
+           indiceJ, nomJ, ptsJ;
+    Registro jugadores[TOP];
+
+    // Barra naranja
+    setfillstyle(1, 0x0033FF);
+    setbkcolor(0x0033FF);
+    bar(maxx/2-130, maxy/2-60, maxx/2+150, maxy-160);
+    settextstyle(4, HORIZ_DIR, 2);
+
+    // Lee archivo
+    FILE *f; f = fopen(nombre, "rb");
+    if(f== NULL)
+    {
+        outtextxy(maxx/2-textwidth("Aún no hay registros")/2, maxy/2+40, "Aún no hay registros,");
+        outtextxy(maxx/2-textwidth("sé el primero.")/2, maxy/2+textheight("A")+44, "sé el primero.");
+    } else {
+        fread(jugadores, sizeof(Registro),TOP, f);
+        settextstyle(3, HORIZ_DIR, 2);
+        outtextxy(maxx/2-textwidth("Pos      Nombre        Puntos")/2+20, maxy/2-50, "Pos      Nombre        Puntos");
+        settextstyle(4, HORIZ_DIR, 2);
+        for(i=0; i<TOP; i++)
+        {
+            sprintf(indiceJ, "%d", i+1);
+            sprintf(nomJ, "%s", jugadores[i].nombre);
+            sprintf(ptsJ, "%d", jugadores[i].puntos);
+            setcolor(COLOR(255-i*8, 255-i*16, 0));
+            outtextxy(maxx/2-104, maxy/2+i*20-25, indiceJ);
+            outtextxy(maxx/2-textwidth(nomJ)/2, maxy/2+i*20-25, nomJ);
+            outtextxy(maxx/2+70, maxy/2+i*20-25, ptsJ);
+        }
+    }
+    getch();
+    fclose(f);
+}
 void menu()
 {
+    ocultar();
     int op, xm, ym, i, margin = 10;
-    String opciones[] = {"Jugar", "Top", "Ayuda", "Acerca De"};
+    String opciones[] = {"Jugar", "Top 10", "Ayuda", "Acerca De"};
     setbkcolor(0x0066F4);
     setfillstyle(1, 0x0066F4);
     setcolor(0x003988);
@@ -660,6 +711,12 @@ void menu()
                 juego();
         }
     }while(op!=4);
+}
+void ocultar()
+{
+    // Dibujar una barra para ocultar elementos anteriores
+    setfillstyle(1, 0xFF9900);
+    bar(0, maxy/2-100, maxx, maxy-140); // (140) Altura del suelo
 }
 void portada()
 {
