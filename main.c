@@ -17,6 +17,7 @@ typedef struct{
     int x,y;
     int color;
     int e;
+    int comida;
 }TCubo;
 
 typedef struct{
@@ -84,20 +85,23 @@ void crea_contenedor(int x, int y, TCubo cont[N][R][N])
         0x0656CE, // MAS CAFÉ
         0x6AB100, // VERDE 1
         0x71CC2E, // VERDE 2
-        0xCECECE // COLOR FUENTE
+        0xCECECE, // IMAGEN
+        0x71CC2E, // IMAGEN
+        0xff0000 // COLOR FUENTE
     };
     FILE *campo;
-    campo = fopen("escenarioCastillo.txt", "r");
+    campo = fopen("escenario.txt", "r");
     int c;
     for(i=0;i<N;i++)
         for(j=0;j<R;j++)
             for(k=0;k<N;k++)
             {
-                c = fgetc(campo);
+                c = fgetc(campo)-48;
                 cont[i][j][k].x = x+k*TAM-i*PROFX;
                 cont[i][j][k].y = y-j*TAM+i*PROF;
-                cont[i][j][k].e = (c-48)>0?1:0;
-                cont[i][j][k].color = colores[c-48];
+                cont[i][j][k].e = (c==0 || c==9)?0:1;
+                cont[i][j][k].color = colores[c];
+                cont[i][j][k].comida = c==9?1:0;
             }
 
     suelo[0] = cont[0][0][0].x+PROFX;
@@ -291,6 +295,7 @@ void juego()
 {
     int derecha = 0, // Giro: 0 izquierda, 1 derecha.
         hongoCatch = 0, // Bandera para hongo.
+        nivel = 1,
         np = 0, // Paginacion
         i = 0,
         puntos = 0,
@@ -313,6 +318,8 @@ void juego()
     setvisualpage(np);
     do
     {
+        if(puntos == 500)
+            nivel++;
         // Encender bots y salir cuando toquen al pac.
         for(i=0;i<2; i++)
         {
@@ -344,18 +351,17 @@ void juego()
         if(bots[2].m == jug.m && bots[2].c == jug.c )
             vidas -= validaPosicion(contenedor, &jug, bots);
         // Enciende tortuga
-        if((retraso>10000?0:retraso++)%5==0)
+        if((retraso>10000?0:retraso++)%(nivel==1?5:4)==0)
         {
             if((bots[2].m - jug.m > 0) && (contenedor[bots[2].m-1][bots[2].r][bots[2].c].e == 0))
                 bots[2].m--;
-            else if((bots[2].m - jug.m < 0) && (contenedor[bots[2].m+1][bots[2].r][bots[2].c].e == 0))
+            else if((bots[2].m - jug.m < 0)&& (contenedor[bots[2].m+1][bots[2].r][bots[2].c].e == 0))
                 bots[2].m++;
             else if((bots[2].c - jug.c > 0) && (contenedor[bots[2].m][bots[2].r][bots[2].c-1].e == 0))
                 bots[2].c--;
             else if((bots[2].c - jug.c < 0) && (contenedor[bots[2].m][bots[2].r][bots[2].c+1].e == 0))
                 bots[2].c++;
-        }
-
+        };
         // Enciende jugador y tortuga
         contenedor[jug.m][jug.r][jug.c].e=1;
         contenedor[jug.m][jug.r][jug.c].color=jug.color;
@@ -365,7 +371,7 @@ void juego()
         setactivepage(np=!np);
 
         pinta_contenedor(contenedor);
-        pinta_ambiente(1, puntos);
+        pinta_ambiente(nivel, puntos);
         dibujaVidas(vidas);
 
 
@@ -378,14 +384,6 @@ void juego()
 
         if(kbhit()!=0)
         {
-            /*switch(tecla = getch())
-            {
-                case 72: dir = 0; break; // Arriba
-                case 75: dir = 1; break; // Izquierda
-                case 77: dir = 2; break; // Derecha
-                case 80: dir = 3; break; // Abajo
-            }*/
-
             switch(tecla = getch())
             {
                 case 71: // G
@@ -393,31 +391,55 @@ void juego()
                     girar(contenedor, bots, &jug, derecha = !derecha);
                     puntos+=10;
                     break;
-                case 72:
-                    if(jug.m>0 && (contenedor[jug.m-1][jug.r][jug.c].e == 0))
+                case 72: //Arriba
+                    if(jug.m>0 && !(contenedor[jug.m-1][jug.r][jug.c].e))
+                    {
                         jug.m--;
+                        if(contenedor[jug.m-1][jug.r][jug.c].comida)
+                        {
+                            puntos+=10;
+                            contenedor[jug.m-1][jug.r][jug.c].comida = 0;
+                        }
+                    }
                     else if(jug.m == 5 && jug.c == N/2)
                     {
                         jug.r = 3;
                         jug.c = 15;
                         jug.m = 4;
                     }
-                    puntos+=10;
                     break;
-                case 75:
-                    if(jug.c>0 && (contenedor[jug.m][jug.r][jug.c-1].e == 0))
+                case 75: // Izquierda
+                    if(jug.c>0 && !(contenedor[jug.m][jug.r][jug.c-1].e))
+                    {
                         jug.c--;
-                    puntos+=10;
+                        if(contenedor[jug.m][jug.r][jug.c-1].comida)
+                        {
+                            puntos+=10;
+                            contenedor[jug.m][jug.r][jug.c-1].comida = 0;
+                        }
+                    }
                     break;
-                case 77:
-                    if(jug.c<N-1 && (contenedor[jug.m][jug.r][jug.c+1].e == 0))
+                case 77: // Derecha
+                    if(jug.c<N-1 && !(contenedor[jug.m][jug.r][jug.c+1].e))
+                    {
                         jug.c++;
-                    puntos+=10;
+                        if(contenedor[jug.m][jug.r][jug.c+1].comida)
+                        {
+                            puntos+=10;
+                            contenedor[jug.m][jug.r][jug.c+1].comida = 0;
+                        }
+                    }
                     break;
-                case 80:
-                    if(jug.m<N-1 && (contenedor[jug.m+1][jug.r][jug.c].e == 0))
+                case 80: // Abajo
+                    if(jug.m<N-1 && !(contenedor[jug.m+1][jug.r][jug.c].e))
+                    {
                         jug.m++;
-                    puntos+=10;
+                        if(contenedor[jug.m+1][jug.r][jug.c].comida)
+                        {
+                            puntos+=10;
+                            contenedor[jug.m+1][jug.r][jug.c].comida = 0;
+                        }
+                    }
                     break;
             }
         }
@@ -486,7 +508,7 @@ void popup(int puntos)
     for(i=0; i<nRec; x1-=15, y1-=10, x2+=15, y2+=10, i++)
     {
         bar(x1, y1, x2, y2);
-        delay(2);
+        delay(10);
     }
 
     // ¡PERDISTE!
@@ -518,7 +540,7 @@ void popup(int puntos)
 int validaPosicion(TCubo contenedor[N][R][N], TJugador *jug, TJugador bots[3])
 {
     int resta = 0;
-    if(contenedor[N-1][0][0].e == 1)
+    if(contenedor[N-1][0][0].e)
     {
         contenedor[bots[0].m][0][bots[0].c].e = 0;
         contenedor[bots[1].m][0][bots[1].c].e = 0;
@@ -570,7 +592,7 @@ void animarPac(int tam, int altura)
         setcolor(0x00CCFF);
         pieslice(x, maxy-altura, ang, 360-ang, tam);
 
-        delay(10);
+        delay(3);
     }
 }
 void ayuda(String nombre, int x1, int y1, int x2, int y2)
