@@ -318,21 +318,19 @@ void juego()
     setvisualpage(np);
     do
     {
-        if(puntos == 500)
-            nivel++;
         // Encender bots y salir cuando toquen al pac.
         for(i=0;i<2; i++)
         {
             // Variable para crear un retraso en los bots.
             if((retraso>10000?0:retraso++)%5==0)
             {
-                if((bots[i].c - jug.c > 0) && (contenedor[bots[i].m][bots[i].r][bots[i].c-1].e == 0))
+                if((bots[i].c - jug.c > 0) && !(contenedor[bots[i].m][bots[i].r][bots[i].c-1].e))
                     bots[i].c--;
-                else if((bots[i].c - jug.c < 0) && (contenedor[bots[i].m][bots[i].r][bots[i].c+1].e == 0))
+                else if((bots[i].c - jug.c < 0) && !(contenedor[bots[i].m][bots[i].r][bots[i].c+1].e))
                     bots[i].c++;
-                else if((bots[i].m - jug.m > 0) && (contenedor[bots[i].m-1][bots[i].r][bots[i].c].e == 0))
+                else if((bots[i].m - jug.m > 0) && !(contenedor[bots[i].m-1][bots[i].r][bots[i].c].e))
                     bots[i].m--;
-                else if((bots[i].m - jug.m < 0) && (contenedor[bots[i].m+1][bots[i].r][bots[i].c].e == 0))
+                else if((bots[i].m - jug.m < 0) && !(contenedor[bots[i].m+1][bots[i].r][bots[i].c].e))
                     bots[i].m++;
             }
 
@@ -353,13 +351,13 @@ void juego()
         // Enciende tortuga
         if((retraso>10000?0:retraso++)%(nivel==1?5:4)==0)
         {
-            if((bots[2].m - jug.m > 0) && (contenedor[bots[2].m-1][bots[2].r][bots[2].c].e == 0))
+            if((bots[2].m - jug.m > 0) && !(contenedor[bots[2].m-1][bots[2].r][bots[2].c].e))
                 bots[2].m--;
-            else if((bots[2].m - jug.m < 0)&& (contenedor[bots[2].m+1][bots[2].r][bots[2].c].e == 0))
+            else if((bots[2].m - jug.m < 0)&& !(contenedor[bots[2].m+1][bots[2].r][bots[2].c].e))
                 bots[2].m++;
-            else if((bots[2].c - jug.c > 0) && (contenedor[bots[2].m][bots[2].r][bots[2].c-1].e == 0))
+            else if((bots[2].c - jug.c > 0) && !(contenedor[bots[2].m][bots[2].r][bots[2].c-1].e))
                 bots[2].c--;
-            else if((bots[2].c - jug.c < 0) && (contenedor[bots[2].m][bots[2].r][bots[2].c+1].e == 0))
+            else if((bots[2].c - jug.c < 0) && !(contenedor[bots[2].m][bots[2].r][bots[2].c+1].e))
                 bots[2].c++;
         };
         // Enciende jugador y tortuga
@@ -398,14 +396,8 @@ void juego()
                         if(contenedor[jug.m-1][jug.r][jug.c].comida)
                         {
                             puntos+=10;
-                            contenedor[jug.m-1][jug.r][jug.c].comida = 0;
+                            contenedor[jug.m][jug.r][jug.c].comida = 0;
                         }
-                    }
-                    else if(jug.m == 5 && jug.c == N/2)
-                    {
-                        jug.r = 3;
-                        jug.c = 15;
-                        jug.m = 4;
                     }
                     break;
                 case 75: // Izquierda
@@ -415,7 +407,7 @@ void juego()
                         if(contenedor[jug.m][jug.r][jug.c-1].comida)
                         {
                             puntos+=10;
-                            contenedor[jug.m][jug.r][jug.c-1].comida = 0;
+                            contenedor[jug.m][jug.r][jug.c].comida = 0;
                         }
                     }
                     break;
@@ -426,7 +418,7 @@ void juego()
                         if(contenedor[jug.m][jug.r][jug.c+1].comida)
                         {
                             puntos+=10;
-                            contenedor[jug.m][jug.r][jug.c+1].comida = 0;
+                            contenedor[jug.m][jug.r][jug.c].comida = 0;
                         }
                     }
                     break;
@@ -436,8 +428,9 @@ void juego()
                         jug.m++;
                         if(contenedor[jug.m+1][jug.r][jug.c].comida)
                         {
+                            printf("a");
                             puntos+=10;
-                            contenedor[jug.m+1][jug.r][jug.c].comida = 0;
+                            contenedor[jug.m][jug.r][jug.c].comida = 0;
                         }
                     }
                     break;
