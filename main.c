@@ -64,9 +64,9 @@ int main()
     initwindow(1024,700,"Pacmario");
     maxx = getmaxx();
     maxy = getmaxy();
-    //portada();
+    portada();
 
-    // ayuda("ayuda.txt", 0, 0, maxx, maxy);
+    ayuda("ayuda.txt", 0, maxy/2-100, maxx, maxy);
     imprimeRegistro();
     juego();
     getch();
@@ -575,14 +575,14 @@ void animarPac(int tam, int altura)
 }
 void ayuda(String nombre, int x1, int y1, int x2, int y2)
 {
+    ocultar();
     FILE *f;
     String texto;
     int x, y;
 
-    cleardevice();
-    setcolor(0x0011AA);
-    settextstyle(0, HORIZ_DIR, 2);
-    rectangle(x1, y1, x2, y2);
+    setbkcolor(0xFF9900);
+    setcolor(BLACK);
+    settextstyle(3, HORIZ_DIR, 2);
 
     f = fopen(nombre, "r");
 
@@ -592,21 +592,22 @@ void ayuda(String nombre, int x1, int y1, int x2, int y2)
         getch();getch();
     } else {
         y = y1;
+        settextstyle(3, HORIZ_DIR, 2);
         while(!feof(f))
         {
             fgets(texto, 100, f);
             y += textheight(texto);
             x = x1 + (((x2-1)-textwidth(texto))/2);
             outtextxy(x, y, texto);
-            if( y > (y2 - 30))
-            {
-                outtextxy((x2-x1)/2, y2-10, "Presiona una tecla para continuar");
-                getch();getch();
-                cleardevice();
-                rectangle(x1, y1, x2, y2);
-                y = y1;
-            }
         }
+
+        // OBJETIVO Y CONTROLES
+        settextstyle(2, HORIZ_DIR, 8);
+        setcolor(0x660066);
+        outtextxy(maxx/2-textwidth("OBJETIVO")/2, y1-textheight("A")/2, "OBJETIVO");
+        setcolor(0x00FF99);
+        outtextxy(maxx/2-textwidth("CONTROLES")/2, y1+textheight("A")*6, "CONTROLES");
+
         getch();getch();
         fclose(f);
     }
@@ -653,8 +654,9 @@ void imprimeRegistro()
     Registro jugadores[TOP];
 
     // Barra naranja
-    setfillstyle(1, 0x0033FF);
-    setbkcolor(0x0033FF);
+    setcolor(WHITE);
+    setfillstyle(1, 0x0066CC);
+    setbkcolor(0x0066CC);
     bar(maxx/2-130, maxy/2-60, maxx/2+150, maxy-160);
     settextstyle(4, HORIZ_DIR, 2);
 
@@ -716,7 +718,7 @@ void ocultar()
 {
     // Dibujar una barra para ocultar elementos anteriores
     setfillstyle(1, 0xFF9900);
-    bar(0, maxy/2-100, maxx, maxy-140); // (140) Altura del suelo
+    bar(0, maxy/2-140, maxx, maxy-140); // (140) Altura del suelo
 }
 void portada()
 {
@@ -724,7 +726,7 @@ void portada()
         altura = 140; // Altura del suelo
 
     dibujo();
-    menu();
+    //menu();
     while(kbhit()==0)
     {
         time_t tiempo = time(NULL);

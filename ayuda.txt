@@ -1,71 +1,10 @@
-Los usuarios de distribuciones Linux llevan 
-años tratando de trabajar 
-con controladores libres en sus equipos,
- y si hay protagonistas en ese
- terreno esos son Intel, NVIDIA y AMD, cuyas gráficas 
-integradas y dedicadas 
-han sido motivo de concesiones importantes en esa filosofía: 
-si querías jugar 
-a toda potencia en Linux, era casi imposible renunciar a 
-los controladores
- propietarios para Linux que ofrecían estas empresas.
+Come todos los puntos que puedas sin que te atrapen los enemigos. 
+Cuando hayas comido todos los puntos la puerta del castillo se
+abrirá y podrás pasar al siguiente nivel.
 
-http://voxelbuilder.com/edit.html#C/2ecc713498db34495ee67e22ecf0f1:A/bppjYeYhYeYfYfYfYfYfYfYfYfYfYfYeYhYeYfYfYfcvhYfYfYfYfYeYhYeYfYfYfYfYfUhYiYkYiYiYiWffUfSfUhUhWffUfSfUhckfYfYfYfajjSfSfaPfYfYfYuYfYfYfYfYdYfYfYfYfcsicffYfYfYfYfYfYfYfYfYfYfYfUhYiYiYiYiYieWfhUfShUhWfhUhWhfekefUhWfhUhShUfchiYhYhUeWheehfiSfSfUhShShefhecefYhcfhYhcdfShShYeSfSfYhShShYnSfSfYhShShYhSfSfeciiYfYfSeYhYhcfheheheeihYiaefYhYhafhefcdZhffhljhYeYjaffahfShYdahhSfSfYeShShejfeUhYeUfeifhedfiehfeUhUhejjfYeYeakiYeYedraeSfSfaeiSfSfYhShShaReShShYfSfSfYfShShbvbiYfYfYfYfYfSfakcYhSkSfSfSfaZkYfYfYfYfYfSfSfSfSfSfYhakkamaYhSfSdSfYfYfYfYfYfShYeSfYfYfYfYfYfShShSiShYhbqmdYfYfYfajfSfSfaZjYfYfYfSfSeShaqbaddYhYhYhYYYhadjahdYfbtrjSfSfSeSfahlSfSfSeSfSeSfafhSfSfYhSfYfSfYhSfYfaZiYhYhYjYeYbYfYfYfSjSfSfYeZhdSfaqhSfbhhjYeShShSiShShShYfYeYeYfYfYfSfSfSfamjTedYfSfYhafeYhSfYfaekYfSfYhSeYfSfYh
 
-El soporte 3D completo y otras características avanzadas sobre 
-todo en gráficas 
-de AMD y NVIDIA estaba hasta ahora restringido a esos 
-controladores binarios,
- pero AMD ha dado un nuevo paso adelante -no es el primero-
- con la publicación 
-del nuevo controlador Open Source AMDGPU que da soporte 
-a las Radeon R9 285 y 
-que sobre todo prepara el camino para los futuros 
-controladores unificados que
- harán las delicias de los usuarios de distribuciones Linux.
-Los usuarios de distribuciones Linux llevan 
-años tratando de trabajar 
-con controladores libres en sus equipos,
- y si hay protagonistas en ese
- terreno esos son Intel, NVIDIA y AMD, cuyas gráficas 
-integradas y dedicadas 
-han sido motivo de concesiones importantes en esa filosofía: 
-si querías jugar 
-a toda potencia en Linux, era casi imposible renunciar a 
-los controladores
- propietarios para Linux que ofrecían estas empresas.
 
-El soporte 3D completo y otras características avanzadas sobre 
-todo en gráficas 
-de AMD y NVIDIA estaba hasta ahora restringido a esos 
-controladores binarios,
- pero AMD ha dado un nuevo paso adelante -no es el primero-
- con la publicación 
-del nuevo controlador Open Source AMDGPU que da soporte 
-a las Radeon R9 285 y 
-que sobre todo prepara el camino para los futuros 
-controladores unificados que
- harán las delicias de los usuarios de distribuciones Linux.
-Los usuarios de distribuciones Linux llevan 
-años tratando de trabajar 
-con controladores libres en sus equipos,
- y si hay protagonistas en ese
- terreno esos son Intel, NVIDIA y AMD, cuyas gráficas 
-integradas y dedicadas 
-han sido motivo de concesiones importantes en esa filosofía: 
-si querías jugar 
-a toda potencia en Linux, era casi imposible renunciar a 
-los controladores
- propietarios para Linux que ofrecían estas empresas.
-bppjYeYhYeYfYfYfYfYfYfYfYfYfYfYeYhYeYfYfYfcvhYfYfYfYfYeYhYeYfYfYfYfYfUhYiYkYiYiYiWffUfSfUhUhWffUfSfUhckfYfYfYfajjSfSfaPfYfYfYuYfYfYfYfYdYfYfYfYfcsicffYfYfYfYfYfYfYfYfYfYfYfUhYiYiYiYiYieWfhUfShUhWfhUhWhfekefUhWfhUhShUfchiYhYhUeWheehfiSfSfUhShShefhecefYhcfhYhcdfShShYeSfSfYhShShYnSfSfYhShShYhSfSfeciiYfYfSeYhYhcfheheheeihYiaefYhYhafhefcdZhffhljhYeYjaffahfShYdahhSfSfYeShShejfeUhYeUfeifhedfiehfeUhUhejjfYeYeakiYeYe
-El soporte 3D completo y otras características avanzadas sobre 
-todo en gráficas 
-de AMD y NVIDIA estaba hasta ahora restringido a esos 
-controladores binarios,
- pero AMD ha dado un nuevo paso adelante -no es el primero-
- con la publicación 
-del nuevo controlador Open Source AMDGPU que da soporte 
-a las Radeon R9 285 y 
-que sobre todo prepara el camino para los futuros 
-controladores unificados que
- harán las delicias de los usuarios de distribuciones Linux.
+Usa las flechas para moverte
+
+
+La tecla "g" para girar el entorno.
