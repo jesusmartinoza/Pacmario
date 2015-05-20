@@ -487,6 +487,8 @@ void pinta_contenedor(TCubo cont[N][R][N])
             for(k=0;k<N;k++)
                 if(cont[i][j][k].e)
                     cubo(cont[i][j][k].x,cont[i][j][k].y,cont[i][j][k].color);
+                else if(cont[i][j][k].comida)
+                    readimagefile("img/coin.gif", cont[i][j][k].x+4, cont[i][j][k].y+4, cont[i][j][k].x+TAM-4,cont[i][j][k].y+TAM-4);
 }
 void popup(int puntos)
 {
