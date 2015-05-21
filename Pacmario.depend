@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1432103474 source:c:\users\jesúsalberto\documents\pacmario\main.c
+1432189863 source:c:\users\jesúsalberto\documents\pacmario\main.c
 	<stdlib.h>
 	<stdio.h>
 	<conio.h>
@@ -7,7 +7,7 @@
 	<graphics.h>
 	<time.h>
 
-1266119414 c:\program files (x86)\codeblocks-ep\sdk\winbgim\include\graphics.h
+1266101414 c:\program files (x86)\codeblocks-ep\sdk\winbgim\include\graphics.h
 	<windows.h>
 	<limits.h>
 	<sstream>

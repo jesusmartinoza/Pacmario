@@ -607,7 +607,7 @@ void atras()
         y1 = maxy/2-60,
         x2 = maxx/2-200,
         y2 = maxy/2, salir = 0, xm, ym;
-    readimagefile("img/back.gif", x1, y1, x2, y2);
+    readimagefile("img/atras.gif", x1, y1, x2, y2);
     do
     {
         while(!ismouseclick(WM_LBUTTONDOWN));
@@ -659,8 +659,8 @@ void ayuda(String nombre, int x1, int y1, int x2, int y2)
 void dibujo()
 {
     int tam = 20, // Tamaño del Pac
-        altura = 140; // Altura del suelo
-
+        altura = 140, // Altura del suelo
+        i;
 
     // Cielo
     setfillstyle(1,0xFF9900);
@@ -668,28 +668,11 @@ void dibujo()
     setbkcolor(0xFF9900);
 
     // Titulo
-    int margin = 6;
-    String titulo = " PAC-MARIO ";
-    settextstyle(10, HORIZ_DIR, 8);
-    setfillstyle(4,0x40E8FF);
-    setbkcolor(0x00B6EA);
-    bar(
-        maxx/2-textwidth(titulo)/2-margin,
-        maxy/8-margin,
-        maxx/2+textwidth(titulo)/2+margin,
-        maxy/8+textheight(titulo)+margin);
-    setcolor(0x40E8FF);
-    outtextxy(maxx/2-textwidth(titulo)/2, maxy/8, titulo);
-
-    // Tierra
-    setfillstyle(1,0x336699);
-    bar(0, maxy-altura+tam, maxx+1, maxy+1);
+    readimagefile("img/logo.gif", maxx/2-384, 50, maxx/2+384, 250);
 
     // Pasto
-    setfillstyle(1,0x00CC7A);
-    setcolor(0x00CC7A);
-    bar(0, maxy-altura+tam, maxx+1, maxy-altura+tam+10);
-
+    for(i=0;i<maxx;i+=192)
+        readimagefile("img/pasto.gif", i, maxy-192, i+192, maxy);
 }
 void imprimeRegistro()
 {
@@ -700,9 +683,9 @@ void imprimeRegistro()
     Registro jugadores[TOP];
 
     // Barra naranja
-    setcolor(0x4b78F2);
-    setfillstyle(1, 0x00CCFF);
-    setbkcolor(0x00CCFF);
+    setcolor(0x005bb6);
+    setfillstyle(1, 0x0075ea);
+    setbkcolor(0x0075ea);
     bar(maxx/2-130, maxy/2-60, maxx/2+150, maxy-160);
     settextstyle(4, HORIZ_DIR, 2);
 
@@ -722,7 +705,7 @@ void imprimeRegistro()
             sprintf(indiceJ, "%d", i+1);
             sprintf(nomJ, "%s", jugadores[i].nombre);
             sprintf(ptsJ, "%d", jugadores[i].puntos);
-            setcolor(COLOR(255, 51, 0));
+            setcolor(0x00ffff);
             outtextxy(maxx/2-104, maxy/2+i*20-25, indiceJ);
             outtextxy(maxx/2-textwidth(nomJ)/2, maxy/2+i*20-25, nomJ);
             outtextxy(maxx/2+70, maxy/2+i*20-25, ptsJ);
@@ -782,7 +765,7 @@ void ocultar()
 {
     // Dibujar una barra para ocultar elementos anteriores
     setfillstyle(1, 0xFF9900);
-    bar(0, maxy/2-140, maxx, maxy-140); // (140) Altura del suelo
+    bar(0, maxy/2-140, maxx, maxy-128);
 }
 void portada()
 {
