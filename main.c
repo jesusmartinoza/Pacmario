@@ -68,7 +68,7 @@ int main()
 
     readimagefile("img\\coin.gif",100,100,110,110);
     imag=malloc(imagesize(100,100,110,110));
-    getimage(100,100,114,114,imag);
+    getimage(100,100,110,110,imag);
 
     portada();
     getch();
