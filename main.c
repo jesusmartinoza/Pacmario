@@ -1,9 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <conio.h>
 #include <time.h>
 #include <graphics.h>
-#include <time.h>
 
 #define TOP 10 // Numero maximo del top.
 #define N 25

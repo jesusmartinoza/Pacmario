@@ -1,11 +1,9 @@
 # depslib dependency file v1.0
-1432189863 source:c:\users\jesúsalberto\documents\pacmario\main.c
+1432489255 source:c:\users\jesúsalberto\documents\pacmario\main.c
 	<stdlib.h>
 	<stdio.h>
-	<conio.h>
 	<time.h>
 	<graphics.h>
-	<time.h>
 
 1266101414 c:\program files (x86)\codeblocks-ep\sdk\winbgim\include\graphics.h
 	<windows.h>
