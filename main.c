@@ -53,7 +53,8 @@ void imprimeRegistro();
 // Variables globales.
 int maxx, maxy, // Evita repetir la funcion getmaxN() cada vez que se llama en un ciclo.
     suelo[8]; // Coordenadas de la plataforma de juego, comenzado en la izquierda-arriba, izquierda-abajo ...
-void *imag;
+void *coin,
+     *pasto;
 
 /******************************************************************************************
                              Funciones del juego
@@ -64,9 +65,12 @@ int main()
     maxx = getmaxx();
     maxy = getmaxy();
 
-    readimagefile("img\\coin.gif",100,100,110,110);
-    imag=malloc(imagesize(100,100,110,110));
-    getimage(100,100,110,110,imag);
+    readimagefile("img/coin.gif",100,100,110,110);
+    readimagefile("img/pasto.jpg",0, maxy-192, 192, maxy);
+    coin  = malloc(imagesize(100,100,110,110));
+    pasto = malloc(imagesize(0, maxy-192, 192, maxy));
+    getimage(100,100,110,110, coin);
+    getimage(0, maxy-192, 192, maxy,pasto);
 
     portada();
     getch();
@@ -149,7 +153,7 @@ void dibujaVidas(int vidas)
     setcolor(YELLOW);
     setfillstyle(1, YELLOW);
     for(i=0; i<vidas; i++)
-    pieslice(maxx-tam-tam*i, maxy-tam, 40, -40, tam/2);
+        pieslice(maxx-tam-tam*i, maxy-tam, 40, -40, tam/2);
 }
 void girar(TCubo cubo[N][R][N], TJugador enemigos[3], TJugador *pac, int derecha)
 {
@@ -297,8 +301,9 @@ void juego(int nivel, int puntos, int vidas)
 {
     int derecha = 0, // Giro: 0 izquierda, 1 derecha.
         //hongoCatch = 0, // Bandera para hongo.
-        np = 0, // Paginacion
+        np = 0, // Paginacion.
         i = 0,
+        puntosNivel = 0, // Puntos de cada nivel.
         retraso = 0, // Crear un retraso en los bots.
         tecla;
     clock_t ini = clock();
@@ -369,7 +374,7 @@ void juego(int nivel, int puntos, int vidas)
         setactivepage(np=!np);
 
         pinta_contenedor(contenedor);
-        pinta_ambiente(nivel, puntos, ini);
+        pinta_ambiente(nivel, puntos+puntosNivel, ini);
         dibujaVidas(vidas);
 
 
@@ -393,14 +398,14 @@ void juego(int nivel, int puntos, int vidas)
                     {
                         if(contenedor[jug.m-1][jug.r][jug.c].comida)
                         {
-                            puntos+=10;
+                            puntosNivel+=10;
                             contenedor[jug.m-1][jug.r][jug.c].comida = 0;
                         }
                         jug.m--;
                     } else if (contenedor[jug.m-1][jug.r][jug.c].color==0x000000)
                         {
                             nivel++;
-                            juego(nivel++, puntos, vidas);
+                            juego(nivel++, puntos+puntosNivel, vidas);
                         }
                     break;
                 case 75: // Izquierda
@@ -408,7 +413,7 @@ void juego(int nivel, int puntos, int vidas)
                     {
                         if(contenedor[jug.m][jug.r][jug.c-1].comida)
                         {
-                            puntos+=10;
+                            puntosNivel+=10;
                             contenedor[jug.m][jug.r][jug.c-1].comida = 0;
                         }
                         jug.c--;
@@ -419,7 +424,7 @@ void juego(int nivel, int puntos, int vidas)
                     {
                         if(contenedor[jug.m][jug.r][jug.c+1].comida)
                         {
-                            puntos+=10;
+                            puntosNivel+=10;
                             contenedor[jug.m][jug.r][jug.c+1].comida = 0;
                         }
                         jug.c++;
@@ -430,7 +435,7 @@ void juego(int nivel, int puntos, int vidas)
                     {
                         if(contenedor[jug.m+1][jug.r][jug.c].comida)
                         {
-                            puntos+=10;
+                            puntosNivel+=10;
                             contenedor[jug.m+1][jug.r][jug.c].comida = 0;
                         }
                         jug.m++;
@@ -439,7 +444,7 @@ void juego(int nivel, int puntos, int vidas)
             }
         }
         // Cuando termine de comer, abrir la puerta del castillo
-        if(puntos%2130==0 && puntos!=0 )
+        if(puntosNivel%2130==0 && puntosNivel!=0)
             contenedor[4][0][12].color = 0x000000;
     }while(tecla!=27 && vidas>=0);
 
@@ -491,7 +496,7 @@ void pinta_contenedor(TCubo cont[N][R][N])
                 if(cont[i][j][k].e)
                     cubo(cont[i][j][k].x,cont[i][j][k].y,cont[i][j][k].color);
                 else if(cont[i][j][k].comida)
-                      putimage(cont[i][j][k].x+10,cont[i][j][k].y-5,imag,OR_PUT);
+                      putimage(cont[i][j][k].x+10,cont[i][j][k].y-5,coin,OR_PUT);
 }
 void popup(int puntos)
 {
@@ -666,7 +671,8 @@ void dibujo()
 
     // Pasto
     for(i=0;i<maxx;i+=192)
-        readimagefile("img/pasto.gif", i, maxy-192, i+192, maxy);
+        putimage(i, maxy-192, pasto, COPY_PUT);
+
 }
 void imprimeRegistro()
 {
@@ -767,9 +773,7 @@ void portada()
         altura = 140; // Altura del suelo
 
     dibujo();
-
     menu();
-
 
     /*while(kbhit()==0)
     {
