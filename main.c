@@ -35,7 +35,7 @@ void girar(TCubo cubo[N][R][N], TJugador enemigos[3], TJugador *pac, int derecha
 void guardarRegistro(Registro registro);
 void imprimeTiempo(int x1, int y1, int x2, int y2, clock_t inicio);
 void intextxy(int x, int y, int bkcolor, String texto);
-void juego(int nivel, int puntos);
+void juego(int nivel, int puntos, int vidas);
 void pinta_ambiente(int nivel, int puntos, clock_t ini);
 void pinta_contenedor(TCubo cont[N][R][N]);
 void popup(int puntos);
@@ -86,7 +86,6 @@ void crea_contenedor(int x, int y, TCubo cont[N][R][N])
         0x71CC2E, // VERDE 2
         0xCECECE, // IMAGEN
         0x71CC2E, // IMAGEN
-        0xff0000 // COLOR FUENTE
     };
     FILE *campo;
     campo = fopen("escenario.txt", "r");
@@ -156,6 +155,7 @@ void girar(TCubo cubo[N][R][N], TJugador enemigos[3], TJugador *pac, int derecha
 {
     int aux[N][R][N],  // Auxiliar para .existe
         auxC[N][R][N], // Auxiliar para .color
+        auxCom[N][R][N], // Auxiliar para .comida
         m, r, c, auxJ; // Aux para TJugador
 
     if(derecha)
@@ -177,6 +177,7 @@ void girar(TCubo cubo[N][R][N], TJugador enemigos[3], TJugador *pac, int derecha
                 {
                     aux[m][r][c] = cubo[c][r][N-1-m].e;
                     auxC[m][r][c] = cubo[c][r][N-1-m].color;
+                    auxCom[m][r][c] = cubo[c][r][N-1-m].comida;
                 }
     } else {
         auxJ = pac->m;
@@ -195,6 +196,7 @@ void girar(TCubo cubo[N][R][N], TJugador enemigos[3], TJugador *pac, int derecha
                 {
                     aux[m][r][c] = cubo[N-1-c][r][m].e;
                     auxC[m][r][c] = cubo[N-1-c][r][m].color;
+                    auxCom[m][r][c] = cubo[N-1-c][r][m].comida;
                 }
     }
 
@@ -204,6 +206,7 @@ void girar(TCubo cubo[N][R][N], TJugador enemigos[3], TJugador *pac, int derecha
             {
                 cubo[m][r][c].e = aux[m][r][c];
                 cubo[m][r][c].color = auxC[m][r][c];
+                cubo[m][r][c].comida = auxCom[m][r][c];
             }
 }
 
@@ -290,15 +293,14 @@ void imprimeTiempo(int x1, int y1, int x2, int y2, clock_t inicio)
     bar(x1, y1, x2,y2);
     outtextxy(x1+5, y1+5, texto);
 }
-void juego(int nivel, int puntos)
+void juego(int nivel, int puntos, int vidas)
 {
     int derecha = 0, // Giro: 0 izquierda, 1 derecha.
-        hongoCatch = 0, // Bandera para hongo.
+        //hongoCatch = 0, // Bandera para hongo.
         np = 0, // Paginacion
         i = 0,
         retraso = 0, // Crear un retraso en los bots.
-        tecla,
-        vidas = 3;
+        tecla;
     clock_t ini = clock();
     srand(time(NULL));
 
@@ -385,7 +387,6 @@ void juego(int nivel, int puntos)
                 case 71: // G
                 case 103: // g
                     girar(contenedor, bots, &jug, derecha = !derecha);
-                    puntos+=10;
                     break;
                 case 72: //Arriba
                     if(jug.m>0 && !(contenedor[jug.m-1][jug.r][jug.c].e))
@@ -399,7 +400,7 @@ void juego(int nivel, int puntos)
                     } else if (contenedor[jug.m-1][jug.r][jug.c].color==0x000000)
                         {
                             nivel++;
-                            juego(nivel++, puntos);
+                            juego(nivel++, puntos, vidas);
                         }
                     break;
                 case 75: // Izquierda
@@ -438,7 +439,7 @@ void juego(int nivel, int puntos)
             }
         }
         // Cuando termine de comer, abrir la puerta del castillo
-        if(puntos%2130==0 && puntos!=0)
+        if(puntos%2130==0 && puntos!=0 )
             contenedor[4][0][12].color = 0x000000;
     }while(tecla!=27 && vidas>=0);
 
@@ -472,12 +473,7 @@ void pinta_contenedor(TCubo cont[N][R][N])
     // Cielo
     setfillstyle(1, 0xFF9900);
     bar(0, 0, maxx+1, suelo[1]);
-
-    /*for(i=0, j=0; i<suelo[1]; i++)
-    { Esto es un degradado :D ... que afecta el rendimiento :/
-        setcolor(COLOR(0, 0, i%255));
-        line(0, i, maxx, i);
-    }*/
+    readimagefile("img/nubes.gif", maxx/2, 0, maxx/2+432, 286);
 
     // Pasto
     setcolor(0x31D301);
@@ -539,7 +535,7 @@ void popup(int puntos)
     r.puntos = puntos;
     guardarRegistro(r);
     fflush(stdin);
-    juego(1, 0);
+    juego(1, 0, 3);
 }
 int validaPosicion(TCubo contenedor[N][R][N], TJugador *jug, TJugador bots[3])
 {
@@ -746,7 +742,7 @@ void menu()
     switch(op)
     {
         case 0:
-            juego(1, 0);
+            juego(1, 0, 3);
             break;
         case 1:
             imprimeRegistro();
