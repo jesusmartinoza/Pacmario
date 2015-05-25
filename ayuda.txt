@@ -3,10 +3,3 @@ te atrapen los enemigos.
 Cuando hayas comido todos los puntos
 la puerta del castillo se
 abrirá y podrás pasar al siguiente nivel.
-
-
-
-Usa las flechas para moverte
-
-
-La tecla "g" para girar el laberinto.

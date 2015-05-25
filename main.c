@@ -1,16 +1,33 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <time.h>
-#include <graphics.h>
+/*======================================= ARCHIVOS ========================================
+ayuda.txt     |Texto que se muestra al dar clic en ayuda.
+               Se usa en ayuda().
 
-#define TOP 10 // Numero maximo del top.
+escenario.txt |Contiene una serie de numeros que indican la posicion del color que se
+               dibujara un cubo.
+               *Se puede usar escenario.src.txt como archivo auxiliar y así poder editar el
+               escenario de una manera más "humana", copiarlo en escenario.txt y después
+               remover los saltos de linea con tu editor de texto favorito.
+               Cada 7 renglones es una matriz.
+               Se usa en crea_contenedor().
+
+records.dat   |Binario que almacena un arreglo de estructuras del tipo Registro.
+               Se usa en guardarRegistro() e imprimeRegistro().
+==========================================================================================*/
+
+#include <graphics.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
 #define N 25
-#define R 7 // Renglones de altura
-#define TAM 21
 #define PROF (TAM/2)
 #define PROFX 3*PROF/6
+#define R 7 // Renglones de altura
+#define TAM 21
+#define TOP 10 // Numero maximo del top.
 
 typedef char String [100];
+
 typedef struct{
     int x,y;
     int color;
@@ -54,6 +71,7 @@ void imprimeRegistro();
 int maxx, maxy, // Evita repetir la funcion getmaxN() cada vez que se llama en un ciclo.
     suelo[8]; // Coordenadas de la plataforma de juego, comenzado en la izquierda-arriba, izquierda-abajo ...
 void *coin,
+     *nubes,
      *pasto;
 
 /******************************************************************************************
@@ -66,10 +84,15 @@ int main()
     maxy = getmaxy();
 
     readimagefile("img/coin.gif",100,100,110,110);
+    readimagefile("img/nubes.jpg", maxx/2+200, 50, maxx/2+500, 236);
     readimagefile("img/pasto.jpg",0, maxy-192, 192, maxy);
+
     coin  = malloc(imagesize(100,100,110,110));
+    nubes = malloc(imagesize(maxx/2+200, 50, maxx/2+500, 236));
     pasto = malloc(imagesize(0, maxy-192, 192, maxy));
+
     getimage(100,100,110,110, coin);
+    getimage(maxx/2+200, 50, maxx/2+500, 236, nubes);
     getimage(0, maxy-192, 192, maxy,pasto);
 
     portada();
@@ -451,7 +474,7 @@ void juego(int nivel, int puntos, int vidas)
     if(tecla == 27)
         portada();
     else
-        popup(puntos);
+        popup(puntos+puntosNivel);
 }
 
 void pinta_ambiente(int nivel, int puntos, clock_t ini)
@@ -478,7 +501,7 @@ void pinta_contenedor(TCubo cont[N][R][N])
     // Cielo
     setfillstyle(1, 0xFF9900);
     bar(0, 0, maxx+1, suelo[1]);
-    readimagefile("img/nubes.gif", maxx/2, 0, maxx/2+432, 286);
+    putimage(maxx/2+200, 50, nubes, COPY_PUT);
 
     // Pasto
     setcolor(0x31D301);
@@ -511,7 +534,7 @@ void popup(int puntos)
     for(i=0; i<nRec; x1-=15, y1-=10, x2+=15, y2+=10, i++)
     {
         bar(x1, y1, x2, y2);
-        delay(30);
+        delay(20);
     }
 
     // ¡PERDISTE!
@@ -545,7 +568,7 @@ void popup(int puntos)
 int validaPosicion(TCubo contenedor[N][R][N], TJugador *jug, TJugador bots[3])
 {
     int resta = 0;
-    if(contenedor[N-1][0][0].e)
+    if(contenedor[N-1][0][0].e) // Contenedor girado
     {
         contenedor[bots[0].m][0][bots[0].c].e = 0;
         contenedor[bots[1].m][0][bots[1].c].e = 0;
@@ -559,7 +582,7 @@ int validaPosicion(TCubo contenedor[N][R][N], TJugador *jug, TJugador bots[3])
         jug->m = N/2;
         jug->c = N/2+7;
         resta = 1;
-    } else {
+    } else { // Contenedor de frente.
         contenedor[bots[0].m][0][bots[0].c].e = 0;
         contenedor[bots[1].m][0][bots[1].c].e = 0;
         contenedor[bots[2].m][0][bots[2].c].e = 0;
@@ -649,7 +672,7 @@ void ayuda(String nombre, int x1, int y1, int x2, int y2)
         setcolor(0x660066);
         outtextxy(maxx/2-textwidth("OBJETIVO")/2, y1-textheight("A")/2, "OBJETIVO");
         setcolor(0x00FF99);
-        outtextxy(maxx/2-textwidth("CONTROLES")/2, y1+textheight("A")*7, "CONTROLES");
+        readimagefile("img/ayuda.gif", maxx/2-216, y1+textheight("A")*6,  maxx/2+216, y1+textheight("A")*6+170);
 
         atras();
         fclose(f);
