@@ -554,9 +554,6 @@ void popup(int puntos)
 
     // Nombre
     fflush(stdin);
-    fflush(stdin);
-    fflush(stdin);
-    fflush(stdin);
     String nombre;
     setfillstyle(1, 0x5ADEFF);
     bar(maxx/2-textwidth("Puntuación:")/3+15, maxy/2+65, maxx/2+textwidth("Puntuacion:")/3-15, maxy/2+100);
