@@ -534,7 +534,7 @@ void popup(int puntos)
     for(i=0; i<nRec; x1-=15, y1-=10, x2+=15, y2+=10, i++)
     {
         bar(x1, y1, x2, y2);
-        delay(20);
+        delay(15);
     }
 
     // ¡PERDISTE!
@@ -553,6 +553,10 @@ void popup(int puntos)
     outtextxy(maxx/2-textwidth(pts)/2, maxy/2, pts);
 
     // Nombre
+    fflush(stdin);
+    fflush(stdin);
+    fflush(stdin);
+    fflush(stdin);
     String nombre;
     setfillstyle(1, 0x5ADEFF);
     bar(maxx/2-textwidth("Puntuación:")/3+15, maxy/2+65, maxx/2+textwidth("Puntuacion:")/3-15, maxy/2+100);
@@ -562,7 +566,6 @@ void popup(int puntos)
     strcpy(r.nombre, nombre);
     r.puntos = puntos;
     guardarRegistro(r);
-    fflush(stdin);
     juego(1, 0, 3);
 }
 int validaPosicion(TCubo contenedor[N][R][N], TJugador *jug, TJugador bots[3])
