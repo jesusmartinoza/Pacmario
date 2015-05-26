@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1432570674 source:c:\users\jesúsalberto\documents\pacmario\main.c
+1432654390 source:c:\users\jesúsalberto\documents\pacmario\main.c
 	<graphics.h>
 	<stdio.h>
 	<stdlib.h>

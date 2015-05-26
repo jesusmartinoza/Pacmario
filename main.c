@@ -62,6 +62,7 @@ int validaPosicion(TCubo contenedor[N][R][N], TJugador *jug, TJugador bots[3]);
 void animarPac(int tam, int altura);
 void atras();
 void ayuda(String nombre, int x1, int y1, int x2, int y2);
+void creditos();
 void menu();
 void ocultar();
 void portada();
@@ -678,6 +679,12 @@ void ayuda(String nombre, int x1, int y1, int x2, int y2)
         fclose(f);
     }
 }
+void creditos()
+{
+    ocultar();
+    readimagefile("img/creditos.gif", maxx/2-300, maxy/2-90, maxx/2+300, maxy/2+210);
+    atras();
+}
 void dibujo()
 {
     int tam = 20, // Tamaño del Pac
@@ -780,7 +787,7 @@ void menu()
             ayuda("ayuda.txt", 0, maxy/2-100, maxx, maxy);
             break;
         case 3:
-            printf("Desarrollado por Jesús Alberto Martínez Mendoza");
+            creditos();
             break;
     }
 }
