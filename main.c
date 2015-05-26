@@ -72,6 +72,7 @@ void imprimeRegistro();
 int maxx, maxy, // Evita repetir la funcion getmaxN() cada vez que se llama en un ciclo.
     suelo[8]; // Coordenadas de la plataforma de juego, comenzado en la izquierda-arriba, izquierda-abajo ...
 void *coin,
+     *colina,
      *nubes,
      *pasto;
 
@@ -85,14 +86,17 @@ int main()
     maxy = getmaxy();
 
     readimagefile("img/coin.gif",100,100,110,110);
+    readimagefile("img/colina.gif",maxx-324,maxy-149,maxx,maxy);
     readimagefile("img/nubes.jpg", maxx/2+200, 50, maxx/2+500, 236);
     readimagefile("img/pasto.jpg",0, maxy-192, 192, maxy);
 
     coin  = malloc(imagesize(100,100,110,110));
+    colina= malloc(imagesize(maxx-324,maxy-149,maxx,maxy));
     nubes = malloc(imagesize(maxx/2+200, 50, maxx/2+500, 236));
     pasto = malloc(imagesize(0, maxy-192, 192, maxy));
 
     getimage(100,100,110,110, coin);
+    getimage(maxx-324,maxy-149,maxx,maxy, colina);
     getimage(maxx/2+200, 50, maxx/2+500, 236, nubes);
     getimage(0, maxy-192, 192, maxy,pasto);
 
@@ -508,6 +512,7 @@ void pinta_contenedor(TCubo cont[N][R][N])
     setcolor(0x31D301);
     setfillstyle(1, 0x31D301);
     bar(0, suelo[1], maxx+1, maxy+1);
+    putimage(10, suelo[1]-150, colina, COPY_PUT);
 
     // Zona de juego
     setcolor(0x31D301);
