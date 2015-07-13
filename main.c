@@ -24,6 +24,7 @@ typedef struct{
 
 
 // Funciones del juego.
+void ayuda(String nombre, int x1, int y1, int x2, int y2);
 void crea_contenedor(int x, int y,  TCubo cont[N][R][N]);
 void cubo(int x, int y, int color);
 void girar(TCubo cubo[N][R][N], int derecha);
@@ -48,8 +49,8 @@ int main()
 
     srand(time(NULL));
     portada();
-    cleardevice();
 
+    ayuda("ayuda.txt", 0, 0, maxx, maxy);
     setbkcolor(BLACK);
     juego("Jesús");
     getch();
@@ -57,6 +58,44 @@ int main()
     return(0);
 }
 
+void ayuda(String nombre, int x1, int y1, int x2, int y2)
+{
+    FILE *f;
+    String texto;
+    int x, y;
+
+    cleardevice();
+    setcolor(0x0011AA);
+    settextstyle(0, HORIZ_DIR, 2);
+    rectangle(x1, y1, x2, y2);
+
+    f = fopen(nombre, "r");
+
+    if(f == NULL)
+    {
+        outtextxy(x1+((x2-x1)-textwidth("No se encuentra el archivo")/2), (y1-y2)/2, "No se encontró archivo.");
+        getch();getch();
+    } else {
+        y = y1;
+        while(!feof(f))
+        {
+            fgets(texto, 100, f);
+            y += textheight(texto);
+            x = x1 + (((x2-1)-textwidth(texto))/2);
+            outtextxy(x, y, texto);
+            if( y > (y2 - 30))
+            {
+                outtextxy((x2-x1)/2, y2-10, "Presiona una tecla para continuar");
+                getch();getch();
+                cleardevice();
+                rectangle(x1, y1, x2, y2);
+                y = y1;
+            }
+        }
+        getch();getch();
+        fclose(f);
+    }
+}
 void crea_contenedor(int x, int y, TCubo cont[N][R][N])
 {
     int i,j,k, existes[N*N];
@@ -248,12 +287,6 @@ void pinta_contenedor(TCubo cont[N][R][N])
     setcolor(0x31D301);
     setfillstyle(1, 0x31D301);
     bar(0, suelo[1], maxx+1, maxy+1);
-    /*int aux = 1, c = 0;
-    for(i=0; i<maxy; i++, c = (c%255 > 100)?c++: c--)
-    {
-        setcolor(COLOR(0, c, 0));
-        line(0, suelo[1]+i, maxx, suelo[1]+i);
-    }*/
 
     // Zona de juego
     setcolor(0x31D301);

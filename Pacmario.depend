@@ -12,3 +12,16 @@
 	<limits.h>
 	<sstream>
 
+1436608703 source:c:\documents and settings\alumnos\mis documentos\215080\pacmario-master\main.c
+	<stdlib.h>
+	<stdio.h>
+	<conio.h>
+	<time.h>
+	<graphics.h>
+	<time.h>
+
+1266119414 c:\archivos de programa\codeblocks-ep\sdk\winbgim\include\graphics.h
+	<windows.h>
+	<limits.h>
+	<sstream>
+
