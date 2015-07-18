@@ -5,6 +5,7 @@
 #include <graphics.h>
 #include <time.h>
 
+#define TOP 10 // Numero maximo del top.
 #define N 25
 #define R 1 // Renglones de altura
 #define TAM 20
@@ -22,12 +23,18 @@ typedef struct{
     int m,r,c,color;
 }TJugador;
 
+typedef struct {
+    String nombre;
+    int puntos;
+} Registro;
 
-// Funciones del juego.
+// Funciones del jue
+void guardarRegistro(String nombre, Registro registro);
 void ayuda(String nombre, int x1, int y1, int x2, int y2);
 void crea_contenedor(int x, int y,  TCubo cont[N][R][N]);
 void cubo(int x, int y, int color);
 void girar(TCubo cubo[N][R][N], int derecha);
+void guardarRegistro(String nombre, Registro registro);
 void juego(String nombre);
 void pinta_ambiente(char nombre[100]);
 void pinta_contenedor(TCubo cont[N][R][N]);
@@ -50,7 +57,7 @@ int main()
     srand(time(NULL));
     portada();
 
-    ayuda("ayuda.txt", 0, 0, maxx, maxy);
+    // ayuda("ayuda.txt", 0, 0, maxx, maxy);
     setbkcolor(BLACK);
     juego("Jesús");
     getch();
@@ -173,18 +180,54 @@ void girar(TCubo cubo[N][R][N], int derecha)
         for(c=0;c<N;c++)
             cubo[m][0][c].e = aux[m][0][c];
 }
+
+void guardarRegistro(String nombre, Registro registro)
+{
+    FILE *f;
+    Registro jugadores[TOP], j = {"", 0};
+    int i;
+
+    f = fopen(nombre, "rb+");
+    if( f== NULL)
+    {
+        f = fopen(nombre, "wb");
+        jugadores[0] = registro;
+        for(i=0; i<TOP; i++)
+            jugadores[i] = j;
+        fwrite(jugadores, sizeof(Registro), TOP, f);
+    } else {
+        fread(jugadores, sizeof(Registro),N, f);
+        for(i=N-1; i>0; i--)
+            if(registro.puntos >= jugadores[i].puntos)
+            {
+                jugadores[i+1] = jugadores[i];
+                jugadores[i] = registro;
+            }
+        fwrite(jugadores, sizeof(Registro), N, f);
+    }
+    fclose(f);
+}
+
 void juego(char nombre[100])
 {
     int aux,
         tecla,
         derecha = 1; // 1 gira derecha, 0 izquierda
+    int np=0;
     srand(time(NULL));
 
     TCubo contenedor[N][R][N];
     TJugador jug = {0,0,0,0x00ffff};
     TJugador maq = {N/2, 0, N/2, 0x532FFF};
     crea_contenedor(maxx/2-maxy/4,maxy/8*3,contenedor);
+
+    setactivepage(0);
     pinta_contenedor(contenedor);
+
+    setactivepage(1);
+    pinta_contenedor(contenedor);
+
+    setvisualpage(np);
 
     do
     {
@@ -193,8 +236,15 @@ void juego(char nombre[100])
         contenedor[jug.m][jug.r][jug.c].color=jug.color;
         contenedor[maq.m][maq.r][maq.c].e=1;  //Enciende maquina
         contenedor[maq.m][maq.r][maq.c].color=maq.color;
+        np=(np+1)%2;
+        setactivepage(np);
+
 
         pinta_contenedor(contenedor);
+
+
+
+        setvisualpage(np);
         contenedor[jug.m][jug.r][jug.c].e=0;  //Apaga jugador
         contenedor[maq.m][maq.r][maq.c].e=0;  //Apaga maq
 
