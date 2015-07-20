@@ -38,6 +38,8 @@ void guardarRegistro(String nombre, Registro registro);
 void juego(String nombre);
 void pinta_ambiente(String nombre, int puntos);
 void pinta_contenedor(TCubo cont[N][R][N]);
+void popup(int puntos);
+
 
 // Funciones de portada.
 void animarPac(int tam, int altura);
@@ -160,6 +162,7 @@ void cubo(int x, int y, int color)
     puntos[7]= y-PROF;
     fillpoly(4,puntos);
 }
+
 void girar(TCubo cubo[N][R][N], int derecha)
 {
     int aux[N][R][N], m, c;
@@ -210,10 +213,11 @@ void guardarRegistro(String nombre, Registro registro)
 void juego(String nombre)
 {
     int aux,
-        tecla,
         derecha = 1, // 1 gira derecha, 0 izquierda
         np = 0, //Paginacion
-        puntos = 0;
+        puntos = 0,
+        salir = 0, // Bandera para salir del juego.
+        tecla;
     srand(time(NULL));
 
     TCubo contenedor[N][R][N];
@@ -231,6 +235,8 @@ void juego(String nombre)
 
     do
     {
+        // Salir cuando toque a la maquina
+        salir = (jug.m == maq.m && jug.c == maq.c) ? 1: 0;
 
         contenedor[jug.m][jug.r][jug.c].e=1;  //Enciende jugador
         contenedor[jug.m][jug.r][jug.c].color=jug.color;
@@ -323,8 +329,9 @@ void juego(String nombre)
             }
         }
         delay(10); //delay(60);
-    }while(tecla!=27);
+    }while(tecla!=27 || !salir);
 
+    popup(puntos);
 }
 
 void pinta_ambiente(String nombre, int puntos)
@@ -367,7 +374,22 @@ void pinta_contenedor(TCubo cont[N][R][N])
                 if(cont[i][j][k].e==1)
                     cubo(cont[i][j][k].x,cont[i][j][k].y,cont[i][j][k].color);
 }
+void popup(int puntos)
+{
+    int i,j,
+        tam = 200; // Tamaño del pop
+    setfillstyle(1,0x00eedd);
+    for(i=maxx/2, j=maxy/2; i<maxx/2+tam; i-=4, j-=4)
+    {
+        bar(i, i, i+tam+4, j+tam+4);
+        delay(1);
+    }
+    Registro r;
+    guardarRegistro("Pedrito.dat", r);
+    getch();getch();
+}
 
+// Funciones de la portada
 void animarPac(int tam, int altura)
 {
     int x, ang, aux = 1;
