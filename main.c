@@ -36,7 +36,7 @@ void cubo(int x, int y, int color);
 void girar(TCubo cubo[N][R][N], int derecha);
 void guardarRegistro(String nombre, Registro registro);
 void juego(String nombre);
-void pinta_ambiente(char nombre[100]);
+void pinta_ambiente(String nombre, int puntos);
 void pinta_contenedor(TCubo cont[N][R][N]);
 
 // Funciones de portada.
@@ -136,7 +136,6 @@ void cubo(int x, int y, int color)
 
     setcolor(0x2DC501);
     setfillstyle(1,color);
-
     //Cara frontal
     bar(x,y,x+TAM,y+TAM);
     rectangle(x,y,x+TAM,y+TAM);
@@ -208,12 +207,13 @@ void guardarRegistro(String nombre, Registro registro)
     fclose(f);
 }
 
-void juego(char nombre[100])
+void juego(String nombre)
 {
     int aux,
         tecla,
-        derecha = 1; // 1 gira derecha, 0 izquierda
-    int np=0;
+        derecha = 1, // 1 gira derecha, 0 izquierda
+        np = 0, //Paginacion
+        puntos = 0;
     srand(time(NULL));
 
     TCubo contenedor[N][R][N];
@@ -223,7 +223,7 @@ void juego(char nombre[100])
 
     setactivepage(0);
     pinta_contenedor(contenedor);
-
+    pinta_ambiente(nombre, puntos);
     setactivepage(1);
     pinta_contenedor(contenedor);
 
@@ -241,7 +241,7 @@ void juego(char nombre[100])
 
 
         pinta_contenedor(contenedor);
-
+        pinta_ambiente(nombre, puntos);
 
 
         setvisualpage(np);
@@ -290,13 +290,18 @@ void juego(char nombre[100])
                         jug.c = 0;
                         jug.m = N-1;
                     }
+                    puntos++;
                     break;
                 case 75:
                     if(jug.c>0 && (contenedor[jug.m][jug.r][jug.c-1].e == 0))
-                        jug.c--; break;
+                        jug.c--;
+                    puntos++;
+                    break;
                 case 77:
                     if(jug.c<N-1 && (contenedor[jug.m][jug.r][jug.c+1].e == 0))
-                        jug.c++; break;
+                        jug.c++;
+                    puntos++;
+                    break;
                 case 80:
                     if(jug.m<N-1 && (contenedor[jug.m+1][jug.r][jug.c].e == 0))
                         jug.m++;
@@ -305,6 +310,7 @@ void juego(char nombre[100])
                         jug.c = N-1;
                         jug.m = 0;
                     }
+                    puntos++;
                     break;
                 case 71: // G
                 case 103: // g
@@ -312,6 +318,7 @@ void juego(char nombre[100])
                     jug.m = jug.c;
                     jug.c = aux;
                     girar(contenedor, derecha = !derecha);
+                    puntos++;
                     break;
             }
         }
@@ -320,18 +327,29 @@ void juego(char nombre[100])
 
 }
 
-void pinta_ambiente(char nombre[100])
+void pinta_ambiente(String nombre, int puntos)
 {
-
+    settextstyle(1,HORIZ_DIR, 2);
+    setcolor(WHITE);
+    setbkcolor(BLACK);
+    outtextxy(textwidth(nombre), 10, nombre);
+    String sPuntos;
+    sprintf(sPuntos, "%d", puntos*10);
+    outtextxy(maxx-textwidth("1000")*2, 10, sPuntos);
 }
 
 void pinta_contenedor(TCubo cont[N][R][N])
 {
     int i,j,k;
-
     // Cielo
-    setfillstyle(1, 0xCCCC33);
-    bar(0, 0, maxx+1, suelo[1]);
+    /*setfillstyle(1, 0xFF9900);
+    bar(0, 0, maxx+1, suelo[1]);*/
+
+    for(i=0, j=0; i<suelo[1]; i++)
+    {
+        setcolor(COLOR(0, 0, i%255));
+        line(0, i, maxx, i);
+    }
 
     // Pasto
     setcolor(0x31D301);
