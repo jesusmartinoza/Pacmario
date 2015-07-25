@@ -329,7 +329,7 @@ void juego(String nombre)
             }
         }
         delay(10); //delay(60);
-    }while(tecla!=27 || !salir);
+    }while(tecla!=27 && !salir);
 
     popup(puntos);
 }
@@ -349,14 +349,14 @@ void pinta_contenedor(TCubo cont[N][R][N])
 {
     int i,j,k;
     // Cielo
-    /*setfillstyle(1, 0xFF9900);
-    bar(0, 0, maxx+1, suelo[1]);*/
+    setfillstyle(1, 0xFF9900);
+    bar(0, 0, maxx+1, suelo[1]);
 
-    for(i=0, j=0; i<suelo[1]; i++)
+    /*for(i=0, j=0; i<suelo[1]; i++)
     {
         setcolor(COLOR(0, 0, i%255));
         line(0, i, maxx, i);
-    }
+    }*/
 
     // Pasto
     setcolor(0x31D301);
@@ -378,10 +378,10 @@ void popup(int puntos)
 {
     int i,j,
         tam = 200; // Tamaño del pop
-    setfillstyle(1,0x00eedd);
+    setfillstyle(1,0x3c4ce7);
     for(i=maxx/2, j=maxy/2; i<maxx/2+tam; i-=4, j-=4)
     {
-        bar(i, i, i+tam+4, j+tam+4);
+        bar(i, j, i, j);
         delay(1);
     }
     Registro r;
