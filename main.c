@@ -34,7 +34,7 @@ void ayuda(String nombre, int x1, int y1, int x2, int y2);
 void crea_contenedor(int x, int y,  TCubo cont[N][R][N]);
 void cubo(int x, int y, int color);
 void girar(TCubo cubo[N][R][N], int derecha);
-void guardarRegistro(String nombre, Registro registro);
+void guardarRegistro(Registro registro);
 void imprimeTiempo(int x1, int y1, int x2, int y2, clock_t inicio);
 void juego(String nombre);
 void pinta_ambiente(String nombre, int puntos);
@@ -52,7 +52,7 @@ int maxx, maxy, // Evita repetir la funcion getmaxN() cada vez que se llama en u
 int main()
 {
 
-    initwindow(800,600,"Pacmario");
+    initwindow(1024,800,"Pacmario");
     maxx = getmaxx();
     maxy = getmaxy();
 
@@ -170,23 +170,19 @@ void girar(TCubo cubo[N][R][N], int derecha)
         m, c;
 
     if(derecha)
-    {
-        printf(" derecha");
         for(m=0;m<N;m++)
             for(c=0;c<N;c++)
             {
                 aux[m][0][c] = cubo[c][0][N-1-m].e;
                 auxC[m][0][c] = cubo[c][0][N-1-m].color;
             }
-    } else {
-        printf(" izquierda");
+    else
         for(m=0;m<N;m++)
             for(c=0;c<N;c++)
             {
                 aux[m][0][c] = cubo[N-1-c][0][m].e;
                 auxC[m][0][c] = cubo[N-1-c][0][m].color;
             }
-    }
 
     for(m=0;m<N;m++)
         for(c=0;c<N;c++)
@@ -196,14 +192,14 @@ void girar(TCubo cubo[N][R][N], int derecha)
         }
 }
 
-void guardarRegistro(String nombre, Registro registro)
+void guardarRegistro(Registro registro)
 {
     FILE *f;
     Registro jugadores[TOP], j = {"", 0};
     int i;
-
+    String nombre = "records.dat";
     f = fopen(nombre, "rb+");
-    if( f== NULL)
+    if(f== NULL)
     {
         f = fopen(nombre, "wb");
         jugadores[0] = registro;
@@ -211,14 +207,16 @@ void guardarRegistro(String nombre, Registro registro)
             jugadores[i] = j;
         fwrite(jugadores, sizeof(Registro), TOP, f);
     } else {
-        fread(jugadores, sizeof(Registro),N, f);
-        for(i=N-1; i>0; i--)
+        printf("Entra else");
+        fread(jugadores, sizeof(Registro),TOP, f);
+        for(i=TOP-1; i>0; i--)
             if(registro.puntos >= jugadores[i].puntos)
             {
                 jugadores[i+1] = jugadores[i];
                 jugadores[i] = registro;
             }
-        fwrite(jugadores, sizeof(Registro), N, f);
+        fseek(f, 0, SEEK_SET);
+        fwrite(jugadores, sizeof(Registro), TOP, f);
     }
     fclose(f);
 }
@@ -237,16 +235,21 @@ void imprimeTiempo(int x1, int y1, int x2, int y2, clock_t inicio)
 void juego(String nombre)
 {
     int aux,
-        derecha = 1, // 1 gira derecha, 0 i0x00CCFFzquierda
+        derecha = 1, // 1 gira derecha, 0 izquierda
         np = 0, //Paginacion
+        i = 0,
         puntos = 0,
         salir = 0, // Bandera para salir del juego.
         tecla;
     srand(time(NULL));
 
     TCubo contenedor[N][R][N];
-    TJugador jug = {0,0,0,0x00ffff};
-    TJugador maq = {N/2, 0, N/2, 0x532FFF};
+    TJugador jug = {N/2+2,0,N/2,0x00ffff};
+    TJugador bots[2];
+
+    bots[0] = {2, 0, 2, 0x532FFF};
+    bots[1] = {N-3, 0, N-3, 0xA9C903};
+
     crea_contenedor(maxx/2-maxy/4,maxy/8*3,contenedor);
 
     setactivepage(0);
@@ -259,13 +262,21 @@ void juego(String nombre)
 
     do
     {
-        // Salir cuando toque a la maquina
-        salir = (jug.m == maq.m && jug.c == maq.c) ? 1: 0;
+        // Salir cuando toque a los bots
+        for(;i<2; i++)
+            salir = (bots[i].m == jug.m && bots[i].c == jug.c ) ? 1: 0;
 
-        contenedor[jug.m][jug.r][jug.c].e=1;  //Enciende jugador
+        //Enciende jugador
+        contenedor[jug.m][jug.r][jug.c].e=1;
         contenedor[jug.m][jug.r][jug.c].color=jug.color;
-        contenedor[maq.m][maq.r][maq.c].e=1;  //Enciende maquina
-        contenedor[maq.m][maq.r][maq.c].color=maq.color;
+
+        //Enciende maquinas
+        for(i=0;i<2;i++)
+        {
+            contenedor[bots[i].m][bots[i].r][bots[i].c].e=1;
+            contenedor[bots[i].m][bots[i].r][bots[i].c].color=bots[i].color;
+        }
+
         np=!np;
         setactivepage(np);
 
@@ -276,26 +287,26 @@ void juego(String nombre)
 
         setvisualpage(np);
         contenedor[jug.m][jug.r][jug.c].e=0;  //Apaga jugador
-        contenedor[maq.m][maq.r][maq.c].e=0;  //Apaga maq
+        contenedor[bots[1].m][bots[1].r][bots[1].c].e=0;   //Apaga maq
 
         int dirm=rand()%4+1; // Direccion de la maquina
         switch(dirm)
         {
             case 1:
-                     if(maq.m>0 && (contenedor[maq.m-1][maq.r][maq.c].e == 0))
-                       maq.m--; // Abajo
+                     if(bots[1].m>0 && (contenedor[bots[1].m-1][bots[1].r][bots[1].c].e == 0))
+                       bots[1].m--; // Abajo
                      break;
             case 2:
-                     if(maq.m<N-1 && (contenedor[maq.m+1][maq.r][maq.c].e == 0))
-                       maq.m++; // Arriba
+                     if(bots[1].m<N-1 && (contenedor[bots[1].m+1][bots[1].r][bots[1].c].e == 0))
+                       bots[1].m++; // Arriba
                      break;
             case 3:
-                     if(maq.c<N-1 && (contenedor[maq.m][maq.r][maq.c+1].e == 0))
-                       maq.c++; // Derecha
+                     if(bots[1].c<N-1 && (contenedor[bots[1].m][bots[1].r][bots[1].c+1].e == 0))
+                       bots[1].c++; // Derecha
                      break;
             case 4:
-                     if(maq.c>0 && (contenedor[maq.m][maq.r][maq.c-1].e == 0))
-                       maq.c--; // Izquierda
+                     if(bots[1].c>0 && (contenedor[bots[1].m][bots[1].r][bots[1].c-1].e == 0))
+                       bots[1].c--; // Izquierda
                      break;
         }
         if(kbhit()!=0)
@@ -312,7 +323,7 @@ void juego(String nombre)
 
             switch(tecla = getch())
             {
-                case 71: // G0x00CCFF
+                case 71: // G
                 case 103: // g
                     aux = jug.m;
                     jug.m = jug.c;
@@ -352,7 +363,6 @@ void juego(String nombre)
                     break;
             }
         }
-        delay(10); //delay(60);
     }while(tecla!=27 && !salir);
 
     popup(puntos);
@@ -406,24 +416,38 @@ void pinta_contenedor(TCubo cont[N][R][N])
 void popup(int puntos)
 {
     int x1,x2,y1,y2, i,
-        tam = 200; // Tamaño del pop
+        nRec = 13; // Numero de rectangulos
     x1 = x2 = (maxx/2);
     y1 = y2 = (maxy/2);
+    String pts;
+    sprintf(pts, "%d", puntos*10);
 
     setfillstyle(1,0x00CCFF);
-    for(i=0; i<tam; x1-=15, y1-=10, x2+=15, y2+=10, i+=15)
+    for(i=0; i<nRec; x1-=15, y1-=10, x2+=15, y2+=10, i++)
     {
         bar(x1, y1, x2, y2);
-        printf("Ya valio");
         delay(2);
     }
+
+    // ¡PERDISTE!
     setbkcolor(0x00CCFF);
-    setcolor(0x3579F2);
-    settextstyle(10, HORIZ_DIR, 5);
-    outtextxy(maxx/2-100, maxy/2-40, "¡PERDISTE!");
-    getch();getch();
-    /*Registro r;
-    guardarRegistro("Pedrito.dat", r);*/
+    setcolor(0x0054D3);
+    settextstyle(3, HORIZ_DIR, 6);
+    outtextxy(maxx/2-textwidth("¡PERDISTE!")/2, y1+textheight("P")/2, "¡PERDISTE!");
+
+    // Puntuacion
+    setcolor(0x4b78F2);
+    settextstyle(3, HORIZ_DIR, 3);
+    outtextxy(maxx/2-textwidth("Puntuación:")/2, y1+textheight("P")*4, "Puntuación:");
+
+    //Puntos
+    settextstyle(3, HORIZ_DIR, 6);
+    outtextxy(maxx/2-textwidth(pts)/2, maxy/2, pts);
+
+    fflush(stdin);
+    getch();
+    Registro r = {"Juana", puntos};
+    guardarRegistro(r);
 }
 
 // Funciones de la portada
