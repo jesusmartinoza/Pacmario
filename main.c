@@ -7,7 +7,7 @@
 
 #define TOP 10 // Numero maximo del top.
 #define N 25
-#define R 1 // Renglones de altura
+#define R 5 // Renglones de altura
 #define TAM 20
 #define PROF TAM/2
 #define PROFX 3*PROF/4
@@ -118,7 +118,7 @@ void crea_contenedor(int x, int y, TCubo cont[N][R][N])
                 c = fgetc(campo);
                 cont[i][j][k].x = x+k*TAM-i*PROFX;
                 cont[i][j][k].y = y-j*TAM+i*PROF;
-                cont[i][j][k].e = c-48;//(i%3==0 && k%6==0 && j==0)?1:0;;
+                cont[i][j][k].e = c-48;
                 cont[i][j][k].color = 0x0052BF;
             }
 
@@ -167,29 +167,32 @@ void girar(TCubo cubo[N][R][N], int derecha)
 {
     int aux[N][R][N],
         auxC[N][R][N],
-        m, c;
+        m, r, c;
 
     if(derecha)
         for(m=0;m<N;m++)
-            for(c=0;c<N;c++)
-            {
-                aux[m][0][c] = cubo[c][0][N-1-m].e;
-                auxC[m][0][c] = cubo[c][0][N-1-m].color;
-            }
+            for(r=0;r<R;r++)
+                for(c=0;c<N;c++)
+                {
+                    aux[m][0][c] = cubo[c][0][N-1-m].e;
+                    auxC[m][0][c] = cubo[c][0][N-1-m].color;
+                }
     else
         for(m=0;m<N;m++)
-            for(c=0;c<N;c++)
-            {
-                aux[m][0][c] = cubo[N-1-c][0][m].e;
-                auxC[m][0][c] = cubo[N-1-c][0][m].color;
-            }
+            for(r=0;r<R;r++)
+                for(c=0;c<N;c++)
+                {
+                    aux[m][0][c] = cubo[N-1-c][0][m].e;
+                    auxC[m][0][c] = cubo[N-1-c][0][m].color;
+                }
 
     for(m=0;m<N;m++)
-        for(c=0;c<N;c++)
-        {
-            cubo[m][0][c].e = aux[m][0][c];
-            cubo[m][0][c].color = auxC[m][0][c];
-        }
+        for(r=0;r<R;r++)
+            for(c=0;c<N;c++)
+            {
+                cubo[m][0][c].e = aux[m][0][c];
+                cubo[m][0][c].color = auxC[m][0][c];
+            }
 }
 
 void guardarRegistro(Registro registro)
@@ -207,7 +210,6 @@ void guardarRegistro(Registro registro)
             jugadores[i] = j;
         fwrite(jugadores, sizeof(Registro), TOP, f);
     } else {
-        printf("Entra else");
         fread(jugadores, sizeof(Registro),TOP, f);
         for(i=TOP-1; i>0; i--)
             if(registro.puntos >= jugadores[i].puntos)
@@ -219,6 +221,48 @@ void guardarRegistro(Registro registro)
         fwrite(jugadores, sizeof(Registro), TOP, f);
     }
     fclose(f);
+}
+
+void intextxy(int x, int y, int bkcolor, String texto)
+{
+    int xi = x;
+    int i = 0, tecla;
+    char letra[2];
+    settextstyle(8, HORIZ_DIR, 4);
+    do
+    {
+        do
+        {
+            setbkcolor(bkcolor);
+            setcolor(BLACK);
+            outtextxy(xi, y, "_");
+            delay(100);
+            setcolor(bkcolor);
+            outtextxy(xi, y, "_");
+            delay(100);
+        }while(!kbhit());
+        tecla = getch();
+        if(tecla!=13 && tecla!='\b')
+        {
+            letra[0] = tecla;
+            letra[1] = '\0';
+            setcolor(BLACK);
+            outtextxy(xi, y, letra);
+            xi+=textwidth(letra);
+            texto[i++] = letra[0];
+
+        } else {
+            if(tecla=='\b' && i>0)
+            {
+                letra[0] = texto[--i];
+                letra[1] = '\0';
+                xi-=textwidth(letra);
+                setcolor(bkcolor);
+                outtextxy(xi, y, letra);
+            }
+        }
+    }while(tecla!=13 && i<15);
+    texto[i] = '\0';
 }
 void imprimeTiempo(int x1, int y1, int x2, int y2, clock_t inicio)
 {
@@ -287,7 +331,7 @@ void juego(String nombre)
 
         setvisualpage(np);
         contenedor[jug.m][jug.r][jug.c].e=0;  //Apaga jugador
-        contenedor[bots[1].m][bots[1].r][bots[1].c].e=0;   //Apaga maq
+        contenedor[bots[1].m][bots[1].r][bots[1].c].e=0;  //Apaga maq
 
         int dirm=rand()%4+1; // Direccion de la maquina
         switch(dirm)
@@ -367,7 +411,25 @@ void juego(String nombre)
 
     popup(puntos);
 }
-
+void menu()
+{
+    int op, xm, ym;
+    do
+    {
+        rectangle(100, 100, 300, 200);
+        outtextxy(120, 110, "Juego");
+        rectangle(100, 200, 300, 250);
+        outtextxy(120, 210, "Record");
+        rectangle(100, 300, 300, 300);
+        outtextxy(120, 310, "Ayuda");
+        while(!ismouseclick(WM_LBUTTONDOWN))
+        {
+            getmouseclick(WM_LBUTTONDOWN, xm, ym);
+            if(xm>100 && xm<300 && ym>100 && ym<150)
+                op =1;
+        }
+    }while(op!=4);
+}
 void pinta_ambiente(String nombre, int puntos)
 {
     setbkcolor(0xFF9900);
@@ -440,13 +502,18 @@ void popup(int puntos)
     settextstyle(3, HORIZ_DIR, 3);
     outtextxy(maxx/2-textwidth("Puntuación:")/2, y1+textheight("P")*4, "Puntuación:");
 
-    //Puntos
+    // Puntos
     settextstyle(3, HORIZ_DIR, 6);
     outtextxy(maxx/2-textwidth(pts)/2, maxy/2, pts);
 
+    // Nombre
+    String nombre;
+    setfillstyle(1, 0x5ADEFF);
+    bar(maxx/2-textwidth("Puntuación:")/3+15, maxy/2+65, maxx/2+textwidth("Puntuacion:")/3-15, maxy/2+100);
+    intextxy(maxx/2-60, maxy/2+65, 0x5ADEFF, nombre);
     fflush(stdin);
     getch();
-    Registro r = {"Juana", puntos};
+    Registro r = {"nombre", puntos};
     guardarRegistro(r);
 }
 
@@ -501,7 +568,7 @@ void dibujo()
     setcolor(0x40E8FF);
     outtextxy(maxx/2-textwidth(titulo)/2, maxy/8, titulo);
 
-    // Tierra
+    // TierraF5D76E
     setfillstyle(1,0x336699);
     bar(0, maxy-altura+tam, maxx+1, maxy+1);
 
