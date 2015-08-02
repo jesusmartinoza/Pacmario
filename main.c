@@ -7,9 +7,9 @@
 
 #define TOP 10 // Numero maximo del top.
 #define N 25
-#define R 1 // Renglones de altura
+#define R 7 // Renglones de altura
 #define TAM 21
-#define PROF TAM/2
+#define PROF (TAM/2)
 #define PROFX 3*PROF/4
 
 typedef char String [100];
@@ -109,7 +109,7 @@ void crea_contenedor(int x, int y, TCubo cont[N][R][N])
 {
     int i,j,k, existes[N*N];
     FILE *campo;
-    campo = fopen("escenario.txt", "r");
+    campo = fopen("escenarioCastillo.txt", "r");
     int c;
     for(i=0;i<N;i++)
         for(j=0;j<R;j++)
@@ -118,6 +118,7 @@ void crea_contenedor(int x, int y, TCubo cont[N][R][N])
                 c = fgetc(campo);
                 cont[i][j][k].x = x+k*TAM-i*PROFX;
                 cont[i][j][k].y = y-j*TAM+i*PROF;
+                switch()
                 cont[i][j][k].e = c-48;
                 cont[i][j][k].color = 0x0861EB; //0x0052BF;
             }
