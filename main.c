@@ -10,7 +10,7 @@
 #define R 7 // Renglones de altura
 #define TAM 21
 #define PROF (TAM/2)
-#define PROFX 3*PROF/4
+#define PROFX 3*PROF/6
 
 typedef char String [100];
 typedef struct{
@@ -107,7 +107,17 @@ void ayuda(String nombre, int x1, int y1, int x2, int y2)
 }
 void crea_contenedor(int x, int y, TCubo cont[N][R][N])
 {
-    int i,j,k, existes[N*N];
+    int i,j,k, existes[N*N],
+    colores[] = {
+        0x3F3122, // NADA
+        0x0861EB, // CAFÉ
+        0xFFCC00, // AZUL
+        0x3F3122, // NEGRO
+        0x0656CE, // MAS CAFÉ
+        0x6AB100, // VERDE 1
+        0x71CC2E, // VERDE 2
+        0xCECECE // COLOR FUENTE
+    };
     FILE *campo;
     campo = fopen("escenarioCastillo.txt", "r");
     int c;
@@ -118,9 +128,8 @@ void crea_contenedor(int x, int y, TCubo cont[N][R][N])
                 c = fgetc(campo);
                 cont[i][j][k].x = x+k*TAM-i*PROFX;
                 cont[i][j][k].y = y-j*TAM+i*PROF;
-                switch()
-                cont[i][j][k].e = c-48;
-                cont[i][j][k].color = 0x0861EB; //0x0052BF;
+                cont[i][j][k].e = (c-48)>0?1:0;
+                cont[i][j][k].color = colores[c-48];
             }
 
     suelo[0] = cont[0][0][0].x+PROFX;
@@ -137,7 +146,7 @@ void cubo(int x, int y, int color)
 {
     int puntos[8];
 
-    setcolor(0x123D9E);//0x2DC501);
+    setcolor(0x503E2C);
     setfillstyle(1,color);
     //Cara frontal
     bar(x,y,x+TAM,y+TAM);
@@ -292,7 +301,7 @@ void juego()
     TJugador jug = {N/2+2,0,N/2,0x00ffff};
     TJugador bots[2];
 
-    bots[0] = {2, 0, 2, 0x532FFF};
+    bots[0] = {N-5, 0, N-5, 0x532FFF};
     bots[1] = {N-3, 0, N-3, 0xA9C903};
 
     crea_contenedor(maxx/2-maxy/4,maxy/8*3,contenedor);
