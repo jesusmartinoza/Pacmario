@@ -7,4 +7,4 @@ abrirá y podrás pasar al siguiente nivel.
 Usa las flechas para moverte
 
 
-La tecla "g" para girar el entorno.
+La tecla "g" para girar el laberinto.

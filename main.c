@@ -66,9 +66,6 @@ int main()
     maxx = getmaxx();
     maxy = getmaxy();
     portada();
-
-    imprimeRegistro();
-    juego();
     getch();
     closegraph();
     return(0);
