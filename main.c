@@ -67,7 +67,6 @@ int main()
     maxy = getmaxy();
     portada();
 
-    ayuda("ayuda.txt", 0, maxy/2-100, maxx, maxy);
     imprimeRegistro();
     juego();
     getch();
@@ -703,13 +702,12 @@ void imprimeRegistro()
 void menu()
 {
     ocultar();
-    int op=0, xm, ym, i, margin = 10;
+    int op=-1, xm, ym, i, margin = 10;
     String opciones[] = {"Jugar", "Top 10", "Ayuda", "Acerca De"};
     setbkcolor(0x0066F4);
     setfillstyle(1, 0x0066F4);
     setcolor(0x003988);
     settextstyle(2, HORIZ_DIR, 8);
-    readimagefile("jake2.gif", 0, 0, 200, 200);
 
     for(i=0; i<4; i++, margin+=textheight("A")*2)
     {
@@ -721,13 +719,32 @@ void menu()
     {
         while(!ismouseclick(WM_LBUTTONDOWN));
         getmouseclick(WM_LBUTTONDOWN, xm, ym);
-        if(xm>maxx/2-textwidth(opciones[0])/2-5
-           && xm<maxy/2+margin-10
-           && ym>maxx/2+textwidth(opciones[0])/2+5
-           && ym<maxy/2+margin+textheight(opciones[0])+10)
-            printf("aaa");
-    }while(op==0);
-
+        margin = 10;
+        for(i=0; i<4; i++, margin+=textheight("A")*2)
+            if(xm>maxx/2-textwidth(opciones[3])/2-5
+               && xm<maxx/2+textwidth(opciones[0])/2-10
+               && ym>maxy/2+margin-10
+               && ym<maxy/2+margin+textheight(opciones[3])+10)
+                {
+                    op = i;
+                    break;
+                }
+    }while(op==-1);
+    switch(op)
+    {
+        case 0:
+            juego();
+            break;
+        case 1:
+            imprimeRegistro();
+            break;
+        case 2:
+            ayuda("ayuda.txt", 0, maxy/2-100, maxx, maxy);
+            break;
+        case 3:
+            printf("Desarrollado por Jesús Alberto Martínez Mendoza");
+            break;
+    }
 }
 void ocultar()
 {
