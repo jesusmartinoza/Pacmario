@@ -501,7 +501,7 @@ void popup(int puntos)
     for(i=0; i<nRec; x1-=15, y1-=10, x2+=15, y2+=10, i++)
     {
         bar(x1, y1, x2, y2);
-        delay(10);
+        delay(3);
     }
 
     // ¡PERDISTE!
@@ -703,13 +703,13 @@ void imprimeRegistro()
 void menu()
 {
     ocultar();
-    int op, xm, ym, i, margin = 10;
+    int op=0, xm, ym, i, margin = 10;
     String opciones[] = {"Jugar", "Top 10", "Ayuda", "Acerca De"};
     setbkcolor(0x0066F4);
     setfillstyle(1, 0x0066F4);
     setcolor(0x003988);
     settextstyle(2, HORIZ_DIR, 8);
-
+    readimagefile("jake2.gif", 0, 0, 200, 200);
 
     for(i=0; i<4; i++, margin+=textheight("A")*2)
     {
@@ -719,15 +719,15 @@ void menu()
 
     do
     {
-        while(!ismouseclick(WM_LBUTTONDOWN))
-        {
-            getmouseclick(WM_LBUTTONDOWN, xm, ym);
-                printf("%d %d\n", xm, ym);
-            if(xm>maxx/2-textwidth(opciones[3])/2-5 && xm<maxy/2+margin-10
-               && ym>maxx/2+textwidth(opciones[3])/2+5 && ym<maxy/2+margin+textheight(opciones[3])+10)
-                juego();
-        }
-    }while(op!=4);
+        while(!ismouseclick(WM_LBUTTONDOWN));
+        getmouseclick(WM_LBUTTONDOWN, xm, ym);
+        if(xm>maxx/2-textwidth(opciones[0])/2-5
+           && xm<maxy/2+margin-10
+           && ym>maxx/2+textwidth(opciones[0])/2+5
+           && ym<maxy/2+margin+textheight(opciones[0])+10)
+            printf("aaa");
+    }while(op==0);
+
 }
 void ocultar()
 {
@@ -741,7 +741,7 @@ void portada()
         altura = 140; // Altura del suelo
 
     dibujo();
-    //menu();
+    menu();
     while(kbhit()==0)
     {
         time_t tiempo = time(NULL);
