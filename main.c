@@ -38,13 +38,14 @@ void guardarRegistro(Registro registro);
 void imprimeTiempo(int x1, int y1, int x2, int y2, clock_t inicio);
 void intextxy(int x, int y, int bkcolor, String texto);
 void juego();
-void pinta_ambiente(int nivel, int puntos);
+void pinta_ambiente(int nivel, int puntos, clock_t ini);
 void pinta_contenedor(TCubo cont[N][R][N]);
 void popup(int puntos);
 int validaPosicion(TCubo contenedor[N][R][N], TJugador *jug, TJugador bots[3]);
 
 // Funciones de portada.
 void animarPac(int tam, int altura);
+void atras();
 void ayuda(String nombre, int x1, int y1, int x2, int y2);
 void menu();
 void ocultar();
@@ -54,7 +55,6 @@ void imprimeRegistro();
 // Variables globales.
 int maxx, maxy, // Evita repetir la funcion getmaxN() cada vez que se llama en un ciclo.
     suelo[8]; // Coordenadas de la plataforma de juego, comenzado en la izquierda-arriba, izquierda-abajo ...
-    clock_t ini = clock();
 
 /******************************************************************************************
                              Funciones del juego
@@ -77,7 +77,7 @@ void crea_contenedor(int x, int y, TCubo cont[N][R][N])
         0x3F3122, // NADA
         0x0861EB, // CAFÉ
         0xFFCC00, // AZUL
-        0x3F3122, // NEGRO
+        0x0653C6, // PUERTA
         0x0656CE, // MAS CAFÉ
         0x6AB100, // VERDE 1
         0x71CC2E, // VERDE 2
@@ -298,6 +298,7 @@ void juego()
         retraso = 0, // Crear un retraso en los bots.
         tecla,
         vidas = 3;
+    clock_t ini = clock();
     srand(time(NULL));
 
     TCubo contenedor[N][R][N];
@@ -365,7 +366,7 @@ void juego()
         setactivepage(np=!np);
 
         pinta_contenedor(contenedor);
-        pinta_ambiente(nivel, puntos);
+        pinta_ambiente(nivel, puntos, ini);
         dibujaVidas(vidas);
 
 
@@ -434,10 +435,13 @@ void juego()
         }
     }while(tecla!=27 && vidas>=0);
 
-    popup(puntos);
+    if(tecla == 27)
+        portada();
+    else
+        popup(puntos);
 }
 
-void pinta_ambiente(int nivel, int puntos)
+void pinta_ambiente(int nivel, int puntos, clock_t ini)
 {
     setbkcolor(0xFF9900);
     setfillstyle(1, 0xFF9900);
@@ -525,6 +529,8 @@ void popup(int puntos)
     strcpy(r.nombre, nombre);
     r.puntos = puntos;
     guardarRegistro(r);
+    fflush(stdin);
+    juego();
 }
 int validaPosicion(TCubo contenedor[N][R][N], TJugador *jug, TJugador bots[3])
 {
@@ -584,6 +590,22 @@ void animarPac(int tam, int altura)
         delay(3);
     }
 }
+void atras()
+{
+    int x1 = maxx/2-260,
+        y1 = maxy/2-60,
+        x2 = maxx/2-200,
+        y2 = maxy/2, salir = 0, xm, ym;
+    readimagefile("img/back.gif", x1, y1, x2, y2);
+    do
+    {
+        while(!ismouseclick(WM_LBUTTONDOWN));
+        getmouseclick(WM_LBUTTONDOWN, xm, ym);
+        if(xm>x1 && xm<x2 && ym>y1 && ym<y2)
+            salir = 1;
+    }while(!salir);
+    menu();
+}
 void ayuda(String nombre, int x1, int y1, int x2, int y2)
 {
     ocultar();
@@ -603,7 +625,7 @@ void ayuda(String nombre, int x1, int y1, int x2, int y2)
         getch();getch();
     } else {
         y = y1;
-        settextstyle(3, HORIZ_DIR, 2);
+        settextstyle(3, HORIZ_DIR, 1);
         while(!feof(f))
         {
             fgets(texto, 100, f);
@@ -617,9 +639,9 @@ void ayuda(String nombre, int x1, int y1, int x2, int y2)
         setcolor(0x660066);
         outtextxy(maxx/2-textwidth("OBJETIVO")/2, y1-textheight("A")/2, "OBJETIVO");
         setcolor(0x00FF99);
-        outtextxy(maxx/2-textwidth("CONTROLES")/2, y1+textheight("A")*6, "CONTROLES");
+        outtextxy(maxx/2-textwidth("CONTROLES")/2, y1+textheight("A")*7, "CONTROLES");
 
-        getch();getch();
+        atras();
         fclose(f);
     }
 }
@@ -665,9 +687,9 @@ void imprimeRegistro()
     Registro jugadores[TOP];
 
     // Barra naranja
-    setcolor(WHITE);
-    setfillstyle(1, 0x0066CC);
-    setbkcolor(0x0066CC);
+    setcolor(0x4b78F2);
+    setfillstyle(1, 0x00CCFF);
+    setbkcolor(0x00CCFF);
     bar(maxx/2-130, maxy/2-60, maxx/2+150, maxy-160);
     settextstyle(4, HORIZ_DIR, 2);
 
@@ -687,13 +709,13 @@ void imprimeRegistro()
             sprintf(indiceJ, "%d", i+1);
             sprintf(nomJ, "%s", jugadores[i].nombre);
             sprintf(ptsJ, "%d", jugadores[i].puntos);
-            setcolor(COLOR(255-i*8, 255-i*16, 0));
+            setcolor(COLOR(255, 51, 0));
             outtextxy(maxx/2-104, maxy/2+i*20-25, indiceJ);
             outtextxy(maxx/2-textwidth(nomJ)/2, maxy/2+i*20-25, nomJ);
             outtextxy(maxx/2+70, maxy/2+i*20-25, ptsJ);
         }
     }
-    getch();
+    atras();
     fclose(f);
 }
 void menu()
@@ -756,7 +778,7 @@ void portada()
 
     dibujo();
     menu();
-    while(kbhit()==0)
+    /*while(kbhit()==0)
     {
         time_t tiempo = time(NULL);
         struct tm *tm;
@@ -767,5 +789,5 @@ void portada()
             animarPac(tam, altura);;
         }
         delay(200);
-    }
+    }*/
 }

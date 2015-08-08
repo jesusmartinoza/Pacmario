@@ -1,5 +1,7 @@
-Come todos los puntos que puedas sin que te atrapen los enemigos.
-Cuando hayas comido todos los puntos la puerta del castillo se
+Come todos los puntos que puedas sin que
+te atrapen los enemigos.
+Cuando hayas comido todos los puntos
+la puerta del castillo se
 abrirá y podrás pasar al siguiente nivel.
 
 
