@@ -318,10 +318,6 @@ void juego(int nivel, int puntos)
     setvisualpage(np);
     do
     {
-        // Cuando termine de comer, abrir la puerta del castillo
-        if(puntos==140)
-            contenedor[4][0][12].color = 0x000000;
-
         // Encender bots y salir cuando toquen al pac.
         for(i=0;i<2; i++)
         {
@@ -365,9 +361,9 @@ void juego(int nivel, int puntos)
                 bots[2].c++;
         };
         // Enciende jugador y tortuga
-        contenedor[jug.m][jug.r][jug.c].e=1;
-        contenedor[jug.m][jug.r][jug.c].color=jug.color;
-        contenedor[bots[2].m][bots[2].r][bots[2].c].e=1;
+        contenedor[jug.m][jug.r][jug.c].e = 1;
+        contenedor[jug.m][jug.r][jug.c].color =0x00ffff;
+        contenedor[bots[2].m][bots[2].r][bots[2].c].e = 1;
         contenedor[bots[2].m][bots[2].r][bots[2].c].color=bots[2].color;
 
         setactivepage(np=!np);
@@ -443,6 +439,9 @@ void juego(int nivel, int puntos)
                     break;
             }
         }
+        // Cuando termine de comer, abrir la puerta del castillo
+        if(puntos%2130==0 && puntos!=0)
+            contenedor[4][0][12].color = 0x000000;
     }while(tecla!=27 && vidas>=0);
 
     if(tecla == 27)
@@ -496,11 +495,7 @@ void pinta_contenedor(TCubo cont[N][R][N])
         for(j=0;j<R;j++)
             for(k=0;k<N;k++)
                 if(cont[i][j][k].e)
-                {
                     cubo(cont[i][j][k].x,cont[i][j][k].y,cont[i][j][k].color);
-                    if(cont[i][j][k].color==0x00FFFF)
-                      putimage(cont[i][j][k].x,cont[i][j][k].y,imag,OR_PUT);
-                }
                 else if(cont[i][j][k].comida)
                       putimage(cont[i][j][k].x+10,cont[i][j][k].y-5,imag,OR_PUT);
 }
@@ -517,7 +512,7 @@ void popup(int puntos)
     for(i=0; i<nRec; x1-=15, y1-=10, x2+=15, y2+=10, i++)
     {
         bar(x1, y1, x2, y2);
-        delay(3);
+        delay(30);
     }
 
     // ¡PERDISTE!
