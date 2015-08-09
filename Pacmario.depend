@@ -7,7 +7,7 @@
 	<graphics.h>
 	<time.h>
 
-1266101414 c:\program files (x86)\codeblocks-ep\sdk\winbgim\include\graphics.h
+1266119414 c:\program files (x86)\codeblocks-ep\sdk\winbgim\include\graphics.h
 	<windows.h>
 	<limits.h>
 	<sstream>
@@ -25,7 +25,15 @@
 	<limits.h>
 	<sstream>
 
-1439024315 source:c:\documents and settings\alumnos\mis documentos\215080\pacmario\main.c
+1439124328 source:c:\documents and settings\alumnos\mis documentos\215080\pacmario\main.c
+	<stdlib.h>
+	<stdio.h>
+	<conio.h>
+	<time.h>
+	<graphics.h>
+	<time.h>
+
+1432137909 source:c:\users\silvia vaca\desktop\pacmario-master\main.c
 	<stdlib.h>
 	<stdio.h>
 	<conio.h>

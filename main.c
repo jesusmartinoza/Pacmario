@@ -37,7 +37,7 @@ void girar(TCubo cubo[N][R][N], TJugador enemigos[3], TJugador *pac, int derecha
 void guardarRegistro(Registro registro);
 void imprimeTiempo(int x1, int y1, int x2, int y2, clock_t inicio);
 void intextxy(int x, int y, int bkcolor, String texto);
-void juego();
+void juego(int nivel, int puntos);
 void pinta_ambiente(int nivel, int puntos, clock_t ini);
 void pinta_contenedor(TCubo cont[N][R][N]);
 void popup(int puntos);
@@ -55,16 +55,21 @@ void imprimeRegistro();
 // Variables globales.
 int maxx, maxy, // Evita repetir la funcion getmaxN() cada vez que se llama en un ciclo.
     suelo[8]; // Coordenadas de la plataforma de juego, comenzado en la izquierda-arriba, izquierda-abajo ...
+void *imag;
 
 /******************************************************************************************
                              Funciones del juego
 ******************************************************************************************/
 int main()
 {
-
     initwindow(1024,700,"Pacmario");
     maxx = getmaxx();
     maxy = getmaxy();
+
+    readimagefile("img\\coin.gif",100,100,110,110);
+    imag=malloc(imagesize(100,100,110,110));
+    getimage(100,100,114,114,imag);
+
     portada();
     getch();
     closegraph();
@@ -287,14 +292,12 @@ void imprimeTiempo(int x1, int y1, int x2, int y2, clock_t inicio)
     bar(x1, y1, x2,y2);
     outtextxy(x1+5, y1+5, texto);
 }
-void juego()
+void juego(int nivel, int puntos)
 {
     int derecha = 0, // Giro: 0 izquierda, 1 derecha.
         hongoCatch = 0, // Bandera para hongo.
-        nivel = 1,
         np = 0, // Paginacion
         i = 0,
-        puntos = 0,
         retraso = 0, // Crear un retraso en los bots.
         tecla,
         vidas = 3;
@@ -315,6 +318,10 @@ void juego()
     setvisualpage(np);
     do
     {
+        // Cuando termine de comer, abrir la puerta del castillo
+        if(puntos==140)
+            contenedor[4][0][12].color = 0x000000;
+
         // Encender bots y salir cuando toquen al pac.
         for(i=0;i<2; i++)
         {
@@ -389,46 +396,49 @@ void juego()
                 case 72: //Arriba
                     if(jug.m>0 && !(contenedor[jug.m-1][jug.r][jug.c].e))
                     {
-                        jug.m--;
                         if(contenedor[jug.m-1][jug.r][jug.c].comida)
                         {
                             puntos+=10;
-                            contenedor[jug.m][jug.r][jug.c].comida = 0;
+                            contenedor[jug.m-1][jug.r][jug.c].comida = 0;
                         }
-                    }
+                        jug.m--;
+                    } else if (contenedor[jug.m-1][jug.r][jug.c].color==0x000000)
+                        {
+                            nivel++;
+                            juego(nivel++, puntos);
+                        }
                     break;
                 case 75: // Izquierda
                     if(jug.c>0 && !(contenedor[jug.m][jug.r][jug.c-1].e))
                     {
-                        jug.c--;
                         if(contenedor[jug.m][jug.r][jug.c-1].comida)
                         {
                             puntos+=10;
-                            contenedor[jug.m][jug.r][jug.c].comida = 0;
+                            contenedor[jug.m][jug.r][jug.c-1].comida = 0;
                         }
+                        jug.c--;
                     }
                     break;
                 case 77: // Derecha
                     if(jug.c<N-1 && !(contenedor[jug.m][jug.r][jug.c+1].e))
                     {
-                        jug.c++;
                         if(contenedor[jug.m][jug.r][jug.c+1].comida)
                         {
                             puntos+=10;
-                            contenedor[jug.m][jug.r][jug.c].comida = 0;
+                            contenedor[jug.m][jug.r][jug.c+1].comida = 0;
                         }
+                        jug.c++;
                     }
                     break;
                 case 80: // Abajo
                     if(jug.m<N-1 && !(contenedor[jug.m+1][jug.r][jug.c].e))
                     {
-                        jug.m++;
                         if(contenedor[jug.m+1][jug.r][jug.c].comida)
                         {
-                            printf("a");
                             puntos+=10;
-                            contenedor[jug.m][jug.r][jug.c].comida = 0;
+                            contenedor[jug.m+1][jug.r][jug.c].comida = 0;
                         }
+                        jug.m++;
                     }
                     break;
             }
@@ -486,9 +496,13 @@ void pinta_contenedor(TCubo cont[N][R][N])
         for(j=0;j<R;j++)
             for(k=0;k<N;k++)
                 if(cont[i][j][k].e)
+                {
                     cubo(cont[i][j][k].x,cont[i][j][k].y,cont[i][j][k].color);
+                    if(cont[i][j][k].color==0x00FFFF)
+                      putimage(cont[i][j][k].x,cont[i][j][k].y,imag,OR_PUT);
+                }
                 else if(cont[i][j][k].comida)
-                    readimagefile("img/coin.gif", cont[i][j][k].x+4, cont[i][j][k].y+4, cont[i][j][k].x+TAM-4,cont[i][j][k].y+TAM-4);
+                      putimage(cont[i][j][k].x+10,cont[i][j][k].y-5,imag,OR_PUT);
 }
 void popup(int puntos)
 {
@@ -532,7 +546,7 @@ void popup(int puntos)
     r.puntos = puntos;
     guardarRegistro(r);
     fflush(stdin);
-    juego();
+    juego(1, 0);
 }
 int validaPosicion(TCubo contenedor[N][R][N], TJugador *jug, TJugador bots[3])
 {
@@ -652,6 +666,7 @@ void dibujo()
     int tam = 20, // Tamaño del Pac
         altura = 140; // Altura del suelo
 
+
     // Cielo
     setfillstyle(1,0xFF9900);
     bar(0, 0, maxx+1, maxy+1);
@@ -679,6 +694,7 @@ void dibujo()
     setfillstyle(1,0x00CC7A);
     setcolor(0x00CC7A);
     bar(0, maxy-altura+tam, maxx+1, maxy-altura+tam+10);
+
 }
 void imprimeRegistro()
 {
@@ -754,7 +770,7 @@ void menu()
     switch(op)
     {
         case 0:
-            juego();
+            juego(1, 0);
             break;
         case 1:
             imprimeRegistro();
@@ -779,7 +795,10 @@ void portada()
         altura = 140; // Altura del suelo
 
     dibujo();
+
     menu();
+
+
     /*while(kbhit()==0)
     {
         time_t tiempo = time(NULL);
