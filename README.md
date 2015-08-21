@@ -1,5 +1,5 @@
 # Pacmario v.0.7
 ==============
 Juego hecho en C con la librería graphics.h
-![alt tag](https://cloud.githubusercontent.com/assets/5506693/7719613/9bd0b822-fe88-11e4-87b1-50741eaac09c.png)
-![alt tag](https://cloud.githubusercontent.com/assets/5506693/7719633/d62f4c7c-fe88-11e4-81cb-07c4b8b82a89.PNG)
+![alt tag](https://cloud.githubusercontent.com/assets/5506693/9399233/21306d1e-4777-11e5-8a9c-33c91b26f28b.PNG)
+![alt tag](https://cloud.githubusercontent.com/assets/5506693/9399232/1e7be526-4777-11e5-843b-56fe48ab7cd8.PNG)
