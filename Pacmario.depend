@@ -5,7 +5,7 @@
 	<stdlib.h>
 	<time.h>
 
-1266101414 c:\program files (x86)\codeblocks-ep\sdk\winbgim\include\graphics.h
+1266119414 c:\program files (x86)\codeblocks-ep\sdk\winbgim\include\graphics.h
 	<windows.h>
 	<limits.h>
 	<sstream>
@@ -37,5 +37,11 @@
 	<conio.h>
 	<time.h>
 	<graphics.h>
+	<time.h>
+
+1447914331 source:c:\users\jesús\documents\pacmario\main.c
+	<graphics.h>
+	<stdio.h>
+	<stdlib.h>
 	<time.h>
 
