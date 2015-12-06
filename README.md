@@ -1,7 +1,7 @@
 # Pacmario v.0.7
 
-###Universidad Autónoma de San Luis Potosí 
-###Área de Computación e Informática
+####Universidad Autónoma de San Luis Potosí 
+####Área de Computación e Informática
 ####Estructuras de Datos y Algoritmos A
 
 Introducción a la programación estructurada, juego hecho en C.
