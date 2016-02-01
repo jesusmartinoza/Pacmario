@@ -2,5 +2,6 @@
 
 Proyecto final de la materia de Estructuras de Datos y Algoritmos A. Introducción a la programación estructurada con C.
 <br/>
-![Demo](http://postimg.org/image/aw4deonk1.gif)
+![Demo](http://s16.postimg.org/q4uasgh8l/pac.gif)
+<br/>
 [Watch on Youtube](https://youtu.be/TGNJxpePox0)
